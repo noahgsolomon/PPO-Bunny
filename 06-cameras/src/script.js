@@ -1,5 +1,6 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
+import { TrackballControls } from "three/addons/controls/TrackballControls.js";
 
 /**
  * Base
@@ -31,6 +32,7 @@ const mesh = new THREE.Mesh(
   new THREE.BoxGeometry(1, 1, 1),
   new THREE.MeshBasicMaterial({ color: 0xff0000, wireframe: true })
 );
+
 scene.add(mesh);
 
 const aspectRatio = sizes.width / sizes.height;
@@ -49,6 +51,9 @@ camera.position.z = 3;
 camera.lookAt(mesh.position);
 scene.add(camera);
 
+const controls = new TrackballControls(camera, canvas);
+controls.enableDamping = true;
+
 // Renderer
 const renderer = new THREE.WebGLRenderer({
   canvas: canvas,
@@ -61,10 +66,7 @@ const clock = new THREE.Clock();
 const tick = () => {
   const elapsedTime = clock.getElapsedTime();
 
-  camera.position.z = Math.cos(cursor.x * 2 * Math.PI);
-  camera.position.x = Math.sin(-cursor.x * 2 * Math.PI);
-  camera.position.y = cursor.y * 5;
-  camera.lookAt(mesh.position);
+  controls.update();
 
   // Update objects
   //   mesh.rotation.y = elapsedTime;
