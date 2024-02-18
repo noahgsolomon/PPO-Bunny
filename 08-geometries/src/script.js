@@ -117,7 +117,8 @@ const camera = new THREE.PerspectiveCamera(
   0.1,
   100
 );
-camera.position.z = 3;
+camera.position.z = 5;
+camera.position.y = 5;
 scene.add(camera);
 
 // Controls
@@ -141,7 +142,7 @@ gui.addColor(debugObject, "cubeColor").onChange(() => {
   meshCube.material.color.set(debugObject.cubeColor);
 });
 
-gui.add(debugObject, "samples", 1, 10000, 1).onChange(() => {
+gui.add(debugObject, "samples", 1, 1000, 1).onChange(() => {
   samplingCircle();
   samplingCube();
 });
