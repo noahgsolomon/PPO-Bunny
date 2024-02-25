@@ -1,0 +1,16 @@
+{
+  "name": "pixelated",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "three": "^0.161.0",
+    "vite": "^5.1.4"
+  }
+}
