@@ -5,12 +5,20 @@ import { EffectComposer } from "three/addons/postprocessing/EffectComposer.js";
 import { RenderPixelatedPass } from "three/addons/postprocessing/RenderPixelatedPass.js";
 import { OutputPass } from "three/addons/postprocessing/OutputPass.js";
 import { GUI } from "three/addons/libs/lil-gui.module.min.js";
+import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 
 let camera, scene, renderer, composer, crystalMesh, clock;
 let gui, params;
 
 init();
 animate();
+
+const gltfLoader = new GLTFLoader();
+const textureLoader = new THREE.TextureLoader();
+
+const mapTexture = textureLoader.load("/LeePerrySmith/color.jpg");
+mapTexture.colorSpace = THREE.SRGBColorSpace;
+const normalTexture = textureLoader.load("/LeePerrySmith/normal.jpg");
 
 function init() {
   const aspectRatio = window.innerWidth / window.innerHeight;
@@ -38,7 +46,7 @@ function init() {
   document.body.appendChild(renderer.domElement);
 
   composer = new EffectComposer(renderer);
-  const renderPixelatedPass = new RenderPixelatedPass(6, scene, camera);
+  const renderPixelatedPass = new RenderPixelatedPass(3, scene, camera);
   composer.addPass(renderPixelatedPass);
 
   const outputPass = new OutputPass();
@@ -53,7 +61,7 @@ function init() {
 
   gui = new GUI();
   params = {
-    pixelSize: 6,
+    pixelSize: 3,
     normalEdgeStrength: 0.3,
     depthEdgeStrength: 0.4,
     pixelAlignedPanning: true,
@@ -163,6 +171,42 @@ function onWindowResize() {
   renderer.setSize(window.innerWidth, window.innerHeight);
   composer.setSize(window.innerWidth, window.innerHeight);
 }
+
+/**
+ * Update all materials
+ */
+const updateAllMaterials = () => {
+  scene.traverse((child) => {
+    if (
+      child instanceof THREE.Mesh &&
+      child.material instanceof THREE.MeshStandardMaterial
+    ) {
+      child.material.envMapIntensity = 1;
+      child.material.needsUpdate = true;
+      child.castShadow = true;
+      child.receiveShadow = true;
+    }
+  });
+};
+
+const material = new THREE.MeshStandardMaterial({
+  map: mapTexture,
+  normalMap: normalTexture,
+});
+
+gltfLoader.load("LeePerrySmith/LeePerrySmith.glb", (gltf) => {
+  // Model
+  const mesh = gltf.scene.children[0];
+  //   mesh.rotation.y = Math.PI * 0.5;
+  mesh.position.y = 2 / 5;
+  mesh.material = material;
+  mesh.position.z = 1;
+  mesh.scale.set(0.1, 0.1, 0.1);
+  scene.add(mesh);
+
+  // Update materials
+  updateAllMaterials();
+});
 
 function animate() {
   requestAnimationFrame(animate);

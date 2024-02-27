@@ -3,6 +3,10 @@ import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import GUI from "lil-gui";
 import waterVertexShader from "./shaders/water/vertex.glsl";
 import waterFragmentShader from "./shaders/water/fragment.glsl";
+
+import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer.js";
+import { RenderPixelatedPass } from "three/examples/jsm/postprocessing/RenderPixelatedPass.js";
+
 /**
  * Base
  */
@@ -11,6 +15,7 @@ const gui = new GUI({ width: 340 });
 const debugObject = {
   depthColor: "#6bb1d6",
   surfaceColor: "#ffffff",
+  pixelatedSize: 6,
 };
 
 // Canvas
@@ -111,6 +116,8 @@ window.addEventListener("resize", () => {
   // Update renderer
   renderer.setSize(sizes.width, sizes.height);
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  effectComposer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  effectComposer.setSize(sizes.width, sizes.height);
 });
 
 /**
@@ -139,6 +146,29 @@ const renderer = new THREE.WebGLRenderer({
 renderer.setSize(sizes.width, sizes.height);
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 renderer.setClearColor("#8196ab");
+
+const renderTarget = new THREE.WebGLRenderTarget(800, 600, {
+  samples: renderer.getPixelRatio() === 1 ? 2 : 0,
+});
+
+const effectComposer = new EffectComposer(renderer, renderTarget);
+effectComposer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+effectComposer.setSize(sizes.width, sizes.height);
+
+const renderPass = new RenderPixelatedPass(
+  debugObject.pixelatedSize,
+  scene,
+  camera
+);
+effectComposer.addPass(renderPass);
+
+gui
+  .add(debugObject, "pixelatedSize", 1, 16, 1)
+  .name("pixelated")
+  .onChange(() => {
+    renderPass.setPixelSize(debugObject.pixelatedSize);
+  });
+
 /**
  * Animate
  */
@@ -153,7 +183,7 @@ const tick = () => {
   controls.update();
 
   // Render
-  renderer.render(scene, camera);
+  effectComposer.render();
 
   // Call tick again on the next frame
   window.requestAnimationFrame(tick);
