@@ -1,0 +1,24 @@
+@font-face {
+    font-family: 'Krypton';
+    src: url(../public/krypton.otf);
+}
+
+html,
+body,
+#root {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: ivory;
+}
+
+.label>div {
+    font-family: 'Krypton';
+    color: white;
+    background: #00000060;
+    border-radius: 30px;
+    padding: 15px;
+    position: absolute;
+}
