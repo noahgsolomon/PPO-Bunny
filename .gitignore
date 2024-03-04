@@ -1,1 +1,4 @@
 /*/node_modules
+/journey/*/node_modules
+/*/.next
+/*/.vscode
