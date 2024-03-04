@@ -1,11 +1,21 @@
 import { useHelper } from "@react-three/drei";
+import { useFrame } from "@react-three/fiber";
 import { useRef } from "react";
 import { DirectionalLightHelper } from "three";
 
 export default function Lights() {
+  const dirLight = useRef();
+
+  useFrame((state) => {
+    dirLight.current.position.z = state.camera.position.z + 5;
+    dirLight.current.target.position.z = state.camera.position.z + 4;
+    dirLight.current.target.updateMatrixWorld();
+  });
+
   return (
     <>
       <directionalLight
+        ref={dirLight}
         castShadow
         position={[4, 4, 1]}
         intensity={4.5}

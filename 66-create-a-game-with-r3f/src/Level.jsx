@@ -1,25 +1,38 @@
-import { useGLTF } from "@react-three/drei";
+import { Float, useGLTF, Text } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
-import {
-  CuboidCollider,
-  CylinderCollider,
-  RigidBody,
-} from "@react-three/rapier";
+import { CuboidCollider, RigidBody } from "@react-three/rapier";
 import { useMemo, useRef } from "react";
-import { BoxGeometry, Euler, MeshStandardMaterial, Quaternion } from "three";
+import {
+  BoxGeometry,
+  Color,
+  Euler,
+  MeshStandardMaterial,
+  Quaternion,
+} from "three";
 import { BlockAxe, BlockLimbo, BlockSpinner } from "./Types";
 import Walls from "./Walls";
 
 const boxGeometry = new BoxGeometry(1, 1, 1);
 
 const floor1Material = new MeshStandardMaterial({ color: "limegreen" });
-const floor2Material = new MeshStandardMaterial({ color: "greenyellow" });
-const obstacleMaterial = new MeshStandardMaterial({ color: "orangered" });
-const wallMaterial = new MeshStandardMaterial({ color: "slategrey" });
 
 function BlockStart({ position = [0, 0, 0] }) {
   return (
     <group position={position}>
+      <Float>
+        <Text
+          font="./bebas-neue-v9-latin-regular.woff"
+          scale={0.4}
+          maxWidth={0.25}
+          lineHeight={0.75}
+          textAlign="right"
+          position={[0.75, 0.95, 1.9]}
+          rotation-y={Math.PI}
+        >
+          Marble Race
+          <meshBasicMaterial toneMapped={false} />
+        </Text>
+      </Float>
       <mesh
         receiveShadow
         scale={[4, 0.2, 4]}
@@ -34,6 +47,13 @@ function BlockStart({ position = [0, 0, 0] }) {
 function BlockEnd({ position = [0, 0, 0] }) {
   const burger = useGLTF("./hamburger.glb");
   burger.scene.children.forEach((burg) => (burg.castShadow = true));
+
+  const burgerRef = useRef();
+
+  useFrame((_, delta) => {
+    burgerRef.current.rotation.y += delta * 0.4;
+  });
+
   return (
     <group position={position}>
       <mesh
@@ -43,7 +63,12 @@ function BlockEnd({ position = [0, 0, 0] }) {
         material={floor1Material}
       ></mesh>
       <RigidBody restitution={0.2} friction={0} colliders={"hull"} type="fixed">
-        <primitive position-y={0.5} object={burger.scene} scale={0.15} />
+        <primitive
+          ref={burgerRef}
+          position-y={0.5}
+          object={burger.scene}
+          scale={0.15}
+        />
       </RigidBody>
     </group>
   );
@@ -52,6 +77,7 @@ function BlockEnd({ position = [0, 0, 0] }) {
 export default function Level({
   count = 5,
   types = [BlockSpinner, BlockAxe, BlockLimbo],
+  seed = 0,
 }) {
   const blocks = useMemo(() => {
     const blocks = [];
@@ -61,7 +87,7 @@ export default function Level({
       );
     }
     return blocks;
-  }, [count, types]);
+  }, [count, types, seed]);
   return (
     <>
       <Walls length={count + 2} />
