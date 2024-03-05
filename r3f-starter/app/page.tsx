@@ -1,10 +1,10 @@
 'use client'
 
 import Header from '@/components/Header'
-import ViewLoader from '@/components/loaders/ViewLoader'
 import dynamic from 'next/dynamic'
 import { Suspense } from 'react'
 import { useControls } from 'leva'
+import ViewLoader from '@/components/loaders/ViewLoader'
 
 const Logo = dynamic(() => import('@/components/canvas/Examples').then((mod) => mod.Logo), { ssr: false })
 const Dog = dynamic(() => import('@/components/canvas/Examples').then((mod) => mod.Dog), { ssr: false })
