@@ -1,5 +1,5 @@
 import { Layout } from '@/components/dom/Layout'
-import '@/global.css'
+import '@/globals.css'
 
 export const metadata = {
   title: 'Next.js + Three.js',
