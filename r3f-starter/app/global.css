@@ -15,5 +15,71 @@
     margin: 0;
     padding: 0;
     overflow: hidden;
+    background-color: skyblue;
   }
+}
+
+article {
+  padding: 3vw 5vw 0;
+}
+
+header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+header svg {
+  fill: white;
+  height: 20px;
+}
+
+section {
+  margin: 14vw 0 14vw;
+}
+
+h1 {
+  font-size: 5vw;
+  font-weight: 400;
+}
+
+p,
+section.text {
+  max-width: 400px;
+  font-size: 16px;
+}
+
+.StickyContainer {
+  height: 500vh;
+}
+
+.SomeDomContent {
+  position: sticky;
+  top: 15vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 70vh;
+  padding: 2rem;
+}
+
+/* Debug styles */
+.Debug {
+  outline: 1px dashed rgba(255, 255, 255, 0.33);
+}
+
+.Debug:after {
+  content: 'StickyScrollScene';
+  position: absolute;
+  left: 0;
+  top: 0;
+  background: rgba(255, 255, 255, 0.33);
+  color: black;
+  font-size: 10px;
+  padding: 5px;
+}
+
+.ViewportScrollScene:after {
+  content: 'ViewportScrollScene';
 }

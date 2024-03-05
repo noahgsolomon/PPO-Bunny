@@ -1,16 +1,22 @@
 'use client'
 
+import { r3f } from '@/helpers/global'
 import { forwardRef, ReactNode, Suspense, useImperativeHandle, useRef } from 'react'
-import { OrbitControls, PerspectiveCamera, View as ViewImpl } from '@react-three/drei'
-import { Three } from '@/helpers/components/Three'
+import { OrbitControls, PerspectiveCamera, View as ViewDrei } from '@react-three/drei'
+import { Vector3 } from 'three'
 
-export const Common = ({ color }: { color?: string }) => (
+export const Common = ({
+  color,
+  camera = { position: new Vector3(0, 0, 6) },
+}: {
+  color?: string
+  camera?: { position: Vector3 }
+}) => (
   <Suspense fallback={null}>
     {color && <color attach='background' args={[color]} />}
     <ambientLight />
     <pointLight position={[20, 30, 10]} intensity={3} decay={0.2} />
-    <pointLight position={[-10, -10, -10]} color='blue' decay={0.2} />
-    <PerspectiveCamera makeDefault fov={40} position={[0, 0, 6]} />
+    <PerspectiveCamera makeDefault fov={40} position={camera.position} />
   </Suspense>
 )
 
@@ -27,12 +33,12 @@ const View = forwardRef<ViewProps, any>(({ children, orbit, ...props }, ref) => 
   return (
     <>
       <div ref={localRef} {...props} />
-      <Three>
-        <ViewImpl track={localRef}>
+      <r3f.In>
+        <ViewDrei track={localRef}>
           {children}
           {orbit && <OrbitControls />}
-        </ViewImpl>
-      </Three>
+        </ViewDrei>
+      </r3f.In>
     </>
   )
 })
