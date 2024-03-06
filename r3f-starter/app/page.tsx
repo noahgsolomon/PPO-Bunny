@@ -16,9 +16,9 @@ const View = dynamic(() => import('@/components/canvas/View').then((mod) => mod.
 const Common = dynamic(() => import('@/components/canvas/View').then((mod) => mod.Common), { ssr: false })
 
 export default function Page() {
-  const { sup } = useControls({
-    sup: { value: 1, min: 1, max: 10, step: 1 },
-  })
+  // const { sup } = useControls({
+  //   sup: { value: 1, min: 1, max: 10, step: 1 },
+  // })
 
   return (
     <>
@@ -27,11 +27,7 @@ export default function Page() {
         <div className='w-full text-center md:w-3/5'>
           <View className='flex h-96 w-full flex-col items-center justify-center'>
             <Suspense fallback={null}>
-              {[...Array(sup)].map((_, i) => (
-                <>
-                  <Logo route='/blob' scale={0.6} position={[i / sup, i / sup, 0]} />
-                </>
-              ))}
+              <Logo route='/blob' scale={0.6} />
               <Common />
             </Suspense>
           </View>

@@ -2,7 +2,6 @@
 
 import { useRef } from 'react'
 import dynamic from 'next/dynamic'
-import { GlobalCanvas, SmoothScrollbar } from '@14islands/r3f-scroll-rig'
 const Scene = dynamic(() => import('@/components/canvas/Scene'), { ssr: false })
 
 const Layout = ({ children }) => {

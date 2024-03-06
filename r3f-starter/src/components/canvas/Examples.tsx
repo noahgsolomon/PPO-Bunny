@@ -1,15 +1,12 @@
 'use client'
 
-import { Center, Float, Html, Text3D, useGLTF, useTexture } from '@react-three/drei'
+import { Float, Text3D, useGLTF, useTexture } from '@react-three/drei'
 import { useFrame } from '@react-three/fiber'
 import * as THREE from 'three'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useCursor, MeshDistortMaterial } from '@react-three/drei'
 import { useRouter } from 'next/navigation'
 import { a, animated, config, useSpring, useSpringValue } from '@react-spring/three'
-import { Common, View } from './View'
-import Link from 'next/link'
-import { buttonVariants } from '@/components/ui/button'
 
 export const Blob = ({ route = '/', ...props }) => {
   const router = useRouter()
@@ -80,7 +77,7 @@ export const Logo = ({ route = '/blob', ...props }) => {
 }
 
 export function Duck(props) {
-  const { scene } = useGLTF('/duck.glb')
+  const { scene } = useGLTF('/models/duck.glb')
   const [hovered, setHovered] = useState(false)
 
   const router = useRouter()
@@ -102,7 +99,7 @@ export function Duck(props) {
   )
 }
 export function Dog(props) {
-  const { scene } = useGLTF('/dog.glb')
+  const { scene } = useGLTF('/models/dog.glb')
 
   return <primitive object={scene} {...props} />
 }
