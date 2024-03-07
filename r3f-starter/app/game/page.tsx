@@ -17,11 +17,8 @@ export default function Page() {
         {/* <fog attach='fog' args={['#121316', 0.1, 10]} /> */}
         <Tiles />
         <Lights />
-        <PerspectiveCamera makeDefault position={[0, 20, 10]} />
+        <PerspectiveCamera makeDefault position={[4, 10, 20]} />
       </View>
-      <div className='justify-center flex flex-row'>
-        {/* <Button className='absolute bottom-20  z-10'>Return to Bunny</Button> */}
-      </div>
     </div>
   )
 }
