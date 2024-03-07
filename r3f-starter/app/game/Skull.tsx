@@ -1,8 +1,9 @@
-import React, { useRef } from 'react'
+import React from 'react'
 import { useGLTF } from '@react-three/drei'
 import { Mesh, MeshStandardMaterial } from 'three'
+import { GroupProps } from '@react-three/fiber'
 
-export function Skull(props) {
+export function Skull(props: GroupProps) {
   const { nodes } = useGLTF('/models/skull.glb')
 
   const material = new MeshStandardMaterial({ color: '#ffffff' })
