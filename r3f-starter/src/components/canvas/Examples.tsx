@@ -149,7 +149,7 @@ export const Cube = () => {
 
   useCursor(hovered || hoveredText)
 
-  const matcap = useTexture('./matcapblack.png')
+  const matcap = useTexture('/textures/matcapblack.png')
 
   return (
     <group>

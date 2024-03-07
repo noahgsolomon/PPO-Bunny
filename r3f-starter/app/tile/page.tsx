@@ -3,8 +3,6 @@
 import dynamic from 'next/dynamic'
 import { Suspense } from 'react'
 import Header from '@/components/Header'
-import Link from 'next/link'
-import { buttonVariants } from '@/components/ui/button'
 
 const View = dynamic(() => import('@/components/canvas/View').then((mod) => mod.View), {
   ssr: false,
