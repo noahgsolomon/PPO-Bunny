@@ -72,7 +72,7 @@
   }
 
   body {
-    @apply bg-[#121316] text-foreground overflow-x-hidden;
+    @apply bg-background text-foreground overflow-x-hidden;
   }
 
   html,

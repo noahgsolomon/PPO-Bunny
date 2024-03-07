@@ -36,8 +36,8 @@ export default function Page() {
 
       <div className='mx-auto flex w-full flex-col flex-wrap items-center p-12 md:flex-row  lg:w-4/5'>
         <div className='relative h-48 w-full py-6 sm:w-1/2 md:my-12 md:mb-40'>
-          <h2 className='mb-3 text-3xl font-bold leading-none text-gray-800'>Events are propagated</h2>
-          <p className='mb-8 text-gray-600'>Drag, scroll, pinch, and rotate the canvas to explore the 3D scene.</p>
+          <h2 className='mb-3 text-3xl font-bold leading-none text-primary'>Events are propagated</h2>
+          <p className='mb-8 text-primary/80'>Drag, scroll, pinch, and rotate the canvas to explore the 3D scene.</p>
         </div>
         <div className='relative my-12 h-48 w-full py-6 sm:w-1/2 md:mb-40'>
           <View orbit className='relative h-full  sm:h-48 sm:w-full'>
@@ -56,8 +56,8 @@ export default function Page() {
           </View>
         </div>
         <div className='w-full p-6 sm:w-1/2'>
-          <h2 className='mb-3 text-3xl font-bold leading-none text-gray-800'>Dom and 3D are synchronized</h2>
-          <p className='mb-8 text-gray-600'>
+          <h2 className='mb-3 text-3xl font-bold leading-none text-primary'>Dom and 3D are synchronized</h2>
+          <p className='mb-8 text-primary/80'>
             3D Divs are renderer through the View component. It uses gl.scissor to cut the viewport into segments. You
             tie a view to a tracking div which then controls the position and bounds of the viewport. This allows you to
             have multiple views with a single, performant canvas. These views will follow their tracking elements,

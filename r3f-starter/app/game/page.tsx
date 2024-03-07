@@ -13,7 +13,7 @@ const Common = dynamic(() => import('@/components/canvas/View').then((mod) => mo
 export default function Page() {
   return (
     <div>
-      <View orbit className='absolute top-0 w-full h-full bg-[#121316]'>
+      <View orbit className='absolute top-0 w-full h-full'>
         {/* <fog attach='fog' args={['#121316', 0.1, 10]} /> */}
         <Tiles />
         <Lights />
