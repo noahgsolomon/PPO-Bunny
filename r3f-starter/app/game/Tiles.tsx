@@ -1,11 +1,12 @@
-import { animated, useSprings } from '@react-spring/three'
-import { CameraControls, Center, PerspectiveCamera, RoundedBox } from '@react-three/drei'
+import { a, animated, config, useSpring, useSprings } from '@react-spring/three'
+import { CameraControls, Center, Html, PerspectiveCamera, Plane, RoundedBox } from '@react-three/drei'
 import { Player } from './Player'
 import { button, useControls } from 'leva'
 import { Fragment, useEffect, useRef } from 'react'
 import { Group } from 'three'
 import { useThree } from '@react-three/fiber'
 import { log } from 'console'
+import { Button } from '@/components/ui/button'
 
 export default function Tiles() {
   const [springs, api] = useSprings(100, (i) => {
@@ -19,7 +20,14 @@ export default function Tiles() {
       from: { scale: 0 },
       to: { scale: 1 },
       delay: distance * 100,
+      config: config.gentle,
     }
+  })
+
+  const baseSpring = useSpring({
+    from: { positionY: -7 },
+    to: { positionY: -1 },
+    config: config.gentle,
   })
 
   const player = useRef<Group>()
@@ -39,34 +47,51 @@ export default function Tiles() {
   //   }, [cameraControlsRef, player])
 
   return (
-    <Center top position-y={0.3}>
+    <>
       <group>
         {/* <CameraControls smoothTime={0.5} ref={cameraControlsRef} enabled makeDefault /> */}
-        {springs.map((props, i) => {
-          const fallingTile = Math.random() > 0.95
-          return (
-            <Fragment key={i}>
-              {Math.random() < 0.8 || i === 37 ? (
-                <animated.mesh
-                  receiveShadow
-                  scale={props.scale}
-                  key={i}
-                  position={[(i % 10) * 1.1, fallingTile ? 0 : 5, Math.floor(i / 10) * 1.1]}
-                >
-                  {i === 37 && <Player castShadow position-y={0.5} ref={player} />}
-                  <RoundedBox args={[1, fallingTile ? 10.1 : 0.1, 1]}>
-                    <meshStandardMaterial
-                      metalness={0}
-                      roughness={1}
-                      color={Math.random() > 0.2 ? '#7c62ff' : Math.random() > 0.2 ? '#fc4bb3' : '#3A3D5E'}
-                    />
-                  </RoundedBox>
-                </animated.mesh>
-              ) : null}
-            </Fragment>
-          )
-        })}
+        <Center top position-y={0.3}>
+          {springs.map((props, i) => {
+            const fallingTile = Math.random() > 0.95
+            return (
+              <Fragment key={i}>
+                {Math.random() < 0.8 || i === 37 ? (
+                  <animated.mesh
+                    scale={props.scale}
+                    key={i}
+                    position={[(i % 10) * 1.1, fallingTile ? 0 : 1, Math.floor(i / 10) * 1.1]}
+                  >
+                    {i === 37 && <Player position-y={0.5} ref={player} />}
+                    <RoundedBox args={[1, fallingTile ? 2.1 : 0.1, 1]}>
+                      <meshStandardMaterial
+                        metalness={0}
+                        roughness={1}
+                        color={
+                          fallingTile
+                            ? 'maroon'
+                            : Math.random() > 0.1
+                              ? '#3A3D5E'
+                              : Math.random() > 0.5
+                                ? '#fc4bb3'
+                                : '#7c62ff'
+                        }
+                      />
+                    </RoundedBox>
+                  </animated.mesh>
+                ) : null}
+              </Fragment>
+            )
+          })}
+        </Center>
+        <animated.mesh position-y={baseSpring.positionY} rotation-x={Math.PI * 0.5}>
+          <RoundedBox args={[20, 20]}>
+            <meshStandardMaterial color={'#212336'} />
+          </RoundedBox>
+        </animated.mesh>
+        <Html position-z={10} position-y={2}>
+          <Button variant='secondary'>PLAY</Button>
+        </Html>
       </group>
-    </Center>
+    </>
   )
 }
