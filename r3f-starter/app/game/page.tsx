@@ -14,7 +14,7 @@ export default function Page() {
   return (
     <div>
       <View orbit className='absolute top-0 w-full h-full'>
-        {/* <fog attach='fog' args={['#121316', 0.1, 10]} /> */}
+        {/* <fog attach='fog' args={['#121316', 0.1, 30]} /> */}
         <Tiles />
         <Lights />
         <PerspectiveCamera makeDefault position={[4, 10, 20]} />
