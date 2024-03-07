@@ -44,7 +44,6 @@ export const Logo = ({ route = '/blob', ...props }) => {
   const router = useRouter()
 
   const [hovered, setHovered] = useState(false)
-  const points = useMemo(() => new THREE.EllipseCurve(0, 0, 3, 1.15, 0, 2 * Math.PI, false, 0).getPoints(100), [])
 
   useCursor(hovered)
   useFrame((state, delta) => {
