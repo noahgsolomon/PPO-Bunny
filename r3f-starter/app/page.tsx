@@ -14,7 +14,6 @@ const View = dynamic(() => import('@/components/canvas/View').then((mod) => mod.
   loading: () => <ViewLoader />,
 })
 const Common = dynamic(() => import('@/components/canvas/View').then((mod) => mod.Common), { ssr: false })
-
 export default function Page() {
   // const { sup } = useControls({
   //   sup: { value: 1, min: 1, max: 10, step: 1 },
