@@ -9,7 +9,7 @@ import { Perf } from 'r3f-perf'
 export default function Scene({ ...props }) {
   // Everything defined in here will persist between route changes, only children are swapped
   return (
-    <Canvas {...props} onCreated={(state) => (state.gl.toneMapping = ACESFilmicToneMapping)}>
+    <Canvas {...props} shadows onCreated={(state) => (state.gl.toneMapping = ACESFilmicToneMapping)}>
       <Perf />
       <r3f.Out />
       <Preload all />
