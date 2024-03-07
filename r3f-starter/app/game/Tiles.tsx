@@ -1,16 +1,16 @@
-import { a, animated, config, useSpring, useSprings } from '@react-spring/three'
-import { CameraControls, Center, Html, PerspectiveCamera, Plane, RoundedBox } from '@react-three/drei'
+import { animated, config, useSpring, useSprings } from '@react-spring/three'
+import { Center, Html, RoundedBox } from '@react-three/drei'
 import { Player } from './Player'
-import { button, useControls } from 'leva'
-import { Fragment, useEffect, useRef } from 'react'
+import { Fragment, useMemo, useRef } from 'react'
 import { Group } from 'three'
-import { useThree } from '@react-three/fiber'
-import { log } from 'console'
 import { Button } from '@/components/ui/button'
+import { Clone } from './Clone'
 import { Skull } from './Skull'
+import Bomb from './Bomb'
 
 export default function Tiles() {
-  const [springs, api] = useSprings(100, (i) => {
+  const tileCount = 100
+  const [springs, _] = useSprings(tileCount, (i) => {
     const row = Math.floor(i / 10)
     const col = i % 10
     const centerRow = 4.5
@@ -20,7 +20,7 @@ export default function Tiles() {
     return {
       from: { scale: 0 },
       to: { scale: 1 },
-      delay: distance * 100,
+      delay: distance * 50,
       config: config.gentle,
     }
   })
@@ -33,52 +33,54 @@ export default function Tiles() {
 
   const player = useRef<Group>()
 
-  //   const cameraControlsRef = useRef<CameraControls>()
-
-  //   useControls({
-  //     'fitToBox(mesh)': button(() => {
-  //       cameraControlsRef.current?.fitToBox(player.current, true)
-  //     }),
-  //   })
-
-  //   const three = useThree()
-
-  //   useEffect(() => {
-  //     cameraControlsRef.current?.fitToBox(player.current, true)
-  //   }, [cameraControlsRef, player])
+  const startingTile = useMemo(() => Math.round(Math.random() * tileCount - 1), [])
 
   return (
     <>
       <group>
-        {/* <CameraControls smoothTime={0.5} ref={cameraControlsRef} enabled makeDefault /> */}
         <Center top position-y={0.3}>
           {springs.map((props, i) => {
-            const fallingTile = Math.random() > 0.95
+            const deathTile = Math.random() > 0.98 && i !== startingTile
+            const clone = Math.random() > 0.98 && i !== startingTile && !deathTile
+            const plum = !deathTile && Math.random() > 0.9
+            const gum = plum && Math.random() > 0.8
+            const spike = !startingTile && !deathTile && !plum && !gum && !clone
+            // && Math.random() > 0.75
             return (
               <Fragment key={i}>
-                {Math.random() < 0.8 || i === 37 ? (
+                {Math.random() < 0.8 || i === startingTile ? (
                   <animated.mesh
                     scale={props.scale}
                     key={i}
-                    position={[(i % 10) * 1.1, fallingTile ? 0 : 1, Math.floor(i / 10) * 1.1]}
+                    position={[
+                      (i % Math.sqrt(tileCount)) * 1.1,
+                      deathTile ? 0 : 1,
+                      Math.floor(i / Math.sqrt(tileCount)) * 1.1,
+                    ]}
                   >
-                    {fallingTile && <Skull position-y={1.5} scale={0.3} />}
-                    {i === 37 && <Player position-y={0.5} ref={player} />}
-                    <RoundedBox args={[1, fallingTile ? 2.1 : 0.1, 1]}>
-                      <meshStandardMaterial
-                        metalness={0}
-                        roughness={1}
-                        color={
-                          fallingTile
-                            ? 'maroon'
-                            : Math.random() > 0.1
-                              ? '#3A3D5E'
-                              : Math.random() > 0.5
-                                ? '#fc4bb3'
-                                : '#7c62ff'
-                        }
-                      />
+                    {clone && <Clone position-y={0.5} />}
+                    {deathTile && <Bomb position-y={1.5} scale={0.3} />}
+                    {i === startingTile && <Player position-y={0.5} ref={player} />}
+                    <RoundedBox args={[1, deathTile ? 2.1 : 0.1, 1]}>
+                      {true ? (
+                        <meshStandardMaterial
+                          metalness={0}
+                          roughness={1}
+                          color={deathTile ? 'maroon' : gum ? '#fc4bb3' : plum ? '#7c62ff' : '#3A3D5E'}
+                        />
+                      ) : null}
                     </RoundedBox>
+                    {gum ? (
+                      <mesh position-y={0.5}>
+                        <icosahedronGeometry args={[0.1, 2]} />
+                        <meshStandardMaterial flatShading color={'#fc4bb3'} />
+                      </mesh>
+                    ) : plum ? (
+                      <mesh position-y={0.5}>
+                        <icosahedronGeometry args={[0.1, 2]} />
+                        <meshStandardMaterial flatShading color={'#7c62ff'} />
+                      </mesh>
+                    ) : null}
                   </animated.mesh>
                 ) : null}
               </Fragment>
@@ -91,7 +93,7 @@ export default function Tiles() {
           </RoundedBox>
         </animated.mesh>
         <Html position-z={10} position-y={2}>
-          <Button variant='secondary'>PLAY</Button>
+          <Button>PLAY</Button>
         </Html>
       </group>
     </>
