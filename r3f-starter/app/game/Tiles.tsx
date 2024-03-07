@@ -7,6 +7,7 @@ import { Group } from 'three'
 import { useThree } from '@react-three/fiber'
 import { log } from 'console'
 import { Button } from '@/components/ui/button'
+import { Skull } from './Skull'
 
 export default function Tiles() {
   const [springs, api] = useSprings(100, (i) => {
@@ -61,6 +62,7 @@ export default function Tiles() {
                     key={i}
                     position={[(i % 10) * 1.1, fallingTile ? 0 : 1, Math.floor(i / 10) * 1.1]}
                   >
+                    {fallingTile && <Skull position-y={1.5} scale={0.3} />}
                     {i === 37 && <Player position-y={0.5} ref={player} />}
                     <RoundedBox args={[1, fallingTile ? 2.1 : 0.1, 1]}>
                       <meshStandardMaterial
