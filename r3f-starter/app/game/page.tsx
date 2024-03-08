@@ -6,8 +6,10 @@ import Lights from './Lights'
 import { Vector3 } from 'three'
 import { Html, OrbitControls, PerspectiveCamera, PresentationControls } from '@react-three/drei'
 import { Button } from '@/components/ui/button'
-import { ArrowLeft, ArrowRight, Info } from 'lucide-react'
+import { ArrowLeft, ArrowRight, Heart, Info } from 'lucide-react'
 import { config } from '@react-spring/three'
+import Image from 'next/image'
+import { Avatar, AvatarImage } from '@/components/ui/avatar'
 
 const View = dynamic(() => import('@/components/canvas/View').then((mod) => mod.View), { ssr: false })
 const Common = dynamic(() => import('@/components/canvas/View').then((mod) => mod.Common), { ssr: false })
@@ -49,6 +51,22 @@ export default function Page() {
       <Button disabled variant='none' className='z-10 absolute left-10 top-1/2 transform -translate-y-1/2'>
         <ArrowLeft className='w-10 h-10' />
       </Button>
+      <div className='absolute z-10 left-12 top-12 flex flex-row gap-2 items-center'>
+        <Avatar className='border-[5px] border-blue-500 outline-2 w-16 h-16'>
+          <AvatarImage src='/bunnypfp.png' />
+        </Avatar>
+        <div className='flex flex-col gap-2'>
+          <div className='flex flex-row gap-2 items-center'>
+            <Image src={'/coin.webp'} alt='coin' width={24} height={24} />{' '}
+            <span className='text-yellow-500 font-bold text-2xl'>0</span>
+          </div>
+          <div className='flex flex-row'>
+            <Image width={24} height={24} alt='heart' src={'/legoheart.png'} />
+            <Image width={24} height={24} alt='heart' src={'/legoheart.png'} />
+            <Image width={24} height={24} alt='heart' src={'/legoheart.png'} />
+          </div>
+        </div>
+      </div>
     </div>
   )
 }
