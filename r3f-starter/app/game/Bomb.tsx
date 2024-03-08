@@ -9,8 +9,8 @@ export default function Bomb(props: GroupProps) {
   return (
     <group {...props} dispose={null}>
       <group rotation={[-Math.PI / 2, 0, 0]} scale={300}>
-        <mesh geometry={(nodes.Bomb_1 as Mesh).geometry} material={materials.Black} />
-        <mesh geometry={(nodes.Bomb_2 as Mesh).geometry} material={materials.Grey} />
+        <mesh castShadow geometry={(nodes.Bomb_1 as Mesh).geometry} material={materials.Black} />
+        <mesh castShadow geometry={(nodes.Bomb_2 as Mesh).geometry} material={materials.Grey} />
       </group>
     </group>
   )
