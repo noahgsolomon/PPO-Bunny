@@ -2,11 +2,11 @@ import { animated, config, useSpring, useSprings } from '@react-spring/three'
 import { Center, Html, RoundedBox } from '@react-three/drei'
 import { Player } from './Player'
 import { Fragment, useMemo, useRef } from 'react'
-import { Group } from 'three'
+import { Group, MeshStandardMaterial } from 'three'
 import { Button } from '@/components/ui/button'
 import { Clone } from './Clone'
-import { Skull } from './Skull'
 import Bomb from './Bomb'
+import SpikeMaterial from './SpikeMaterial'
 
 export default function Tiles() {
   const tileCount = 100
@@ -44,7 +44,7 @@ export default function Tiles() {
             const clone = Math.random() > 0.98 && i !== startingTile && !deathTile
             const plum = !deathTile && Math.random() > 0.9
             const gum = plum && Math.random() > 0.8
-            const spike = !startingTile && !deathTile && !plum && !gum && !clone
+            const spike = i !== startingTile && !deathTile && !plum && !gum && !clone && Math.random() < 0.2
             // && Math.random() > 0.75
             return (
               <Fragment key={i}>
@@ -62,22 +62,22 @@ export default function Tiles() {
                     {deathTile && <Bomb position-y={1.5} scale={0.3} />}
                     {i === startingTile && <Player position-y={0.5} ref={player} />}
                     <RoundedBox args={[1, deathTile ? 2.1 : 0.1, 1]}>
-                      {true ? (
+                      {!spike ? (
                         <meshStandardMaterial
-                          metalness={0}
-                          roughness={1}
                           color={deathTile ? 'maroon' : gum ? '#fc4bb3' : plum ? '#7c62ff' : '#3A3D5E'}
                         />
-                      ) : null}
+                      ) : (
+                        <SpikeMaterial />
+                      )}
                     </RoundedBox>
                     {gum ? (
                       <mesh position-y={0.5}>
-                        <icosahedronGeometry args={[0.1, 2]} />
+                        <icosahedronGeometry args={[0.25, 1]} />
                         <meshStandardMaterial flatShading color={'#fc4bb3'} />
                       </mesh>
                     ) : plum ? (
                       <mesh position-y={0.5}>
-                        <icosahedronGeometry args={[0.1, 2]} />
+                        <icosahedronGeometry args={[0.2, 0]} />
                         <meshStandardMaterial flatShading color={'#7c62ff'} />
                       </mesh>
                     ) : null}
