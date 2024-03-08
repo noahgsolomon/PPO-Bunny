@@ -1,4 +1,4 @@
-uniform vec3 uColor;
+export const fragment = `uniform vec3 uColor;
 uniform float uTime;
 
 varying vec3 vPosition;
@@ -33,3 +33,4 @@ void main()
     #include <tonemapping_fragment>
     #include <colorspace_fragment>
 }
+`

@@ -1,4 +1,4 @@
-uniform float uTime;
+export const vertex = `uniform float uTime;
 
 varying vec3 vPosition;
 varying vec3 vNormal;
@@ -32,3 +32,4 @@ void main()
     vPosition = modelPosition.xyz;
     vNormal = modelNormal.xyz;
 }
+`
