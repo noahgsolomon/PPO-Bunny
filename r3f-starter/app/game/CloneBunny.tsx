@@ -1,9 +1,9 @@
 import React from 'react'
 import { useGLTF } from '@react-three/drei'
-import { AdditiveBlending, Color, DoubleSide, Mesh, MeshPhysicalMaterial, ShaderMaterial, Uniform } from 'three'
+import { AdditiveBlending, Color, DoubleSide, Mesh, ShaderMaterial, Uniform } from 'three'
 import { GroupProps, useFrame } from '@react-three/fiber'
-import holographicVertexShader from './hologram/vertex.glsl'
-import holographicFragmentShader from './hologram/fragment.glsl'
+import { vertex as HologramVertexShader } from './hologram/vertex'
+import { fragment as HologramFragmentShader } from './hologram/fragment'
 
 export default function CloneBunny(props: GroupProps) {
   const { nodes } = useGLTF('/models/clonebunny.glb')
@@ -17,12 +17,9 @@ export default function CloneBunny(props: GroupProps) {
   //   side: 2,
   // })
 
-  console.log(holographicFragmentShader)
-  console.log(holographicVertexShader)
-
   const material = new ShaderMaterial({
-    vertexShader: holographicVertexShader,
-    fragmentShader: holographicFragmentShader,
+    vertexShader: HologramVertexShader,
+    fragmentShader: HologramFragmentShader,
     uniforms: {
       uTime: new Uniform(0),
       uColor: new Uniform(new Color('#70c1ff')),
