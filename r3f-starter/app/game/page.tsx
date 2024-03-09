@@ -17,12 +17,11 @@ export default function Page() {
   return (
     <div>
       <View className='absolute top-0 w-full h-full touch-none'>
-        {/* <fog attach='fog' args={['#121316', 0.1, 30]} /> */}
         <PresentationControls
           enabled
           global
           cursor={false}
-          speed={1.5}
+          speed={1}
           zoom={1}
           rotation={[Math.PI * 0.175, 0, 0]}
           polar={[-Math.PI / 16, Math.PI / 3]}

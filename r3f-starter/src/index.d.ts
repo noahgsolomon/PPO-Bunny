@@ -17,4 +17,8 @@ export type EnvironmentState = {
   setVisionCapacity: (visionCapacity: number) => void
   position: Position
   setPosition: (position: Position) => void
+  startingSteps: number
+  setStartingSteps: (staringSteps: number) => void
+  coins: number
+  setCoins: (coins: number) => void
 }

@@ -72,13 +72,17 @@ export default function Tiles() {
                       : tile === 'PLUM'
                         ? PlumTile
                         : DefaultTile,
-          position: { x: i % 10, y: Math.floor(i / 10) },
+          position: { x: i % Math.sqrt(tileCount), y: Math.floor(i / Math.sqrt(tileCount)) },
         })
         return acc
       },
       [] as { type: TileType; position: Position }[],
     )
     environment.setTileMap(newTileMap)
+    environment.setPosition({
+      x: startingTile % Math.sqrt(tileCount),
+      y: Math.floor(startingTile / Math.sqrt(tileCount)),
+    })
   }, [])
 
   return (
@@ -99,6 +103,7 @@ export default function Tiles() {
                     Math.floor(i / Math.sqrt(tileCount)) * 1.1,
                   ]}
                 >
+                  {/* <Html>{`[${environment.tileMap[i]?.position.x}, ${environment.tileMap[i]?.position.y}, ${i}]`}</Html> */}
                   {tile === 'CLONE' && <Clone position-y={0.5} />}
                   {tile === 'BOMB' && <Bomb position-y={1.3} scale={0.3} />}
                   {i === startingTile && (
