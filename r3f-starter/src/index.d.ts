@@ -1,16 +1,19 @@
-export type TileType = {
-  default: { heartGain: 0; coinGain: 0; stepsGain: -1 }
-  bomb: { heartGain: -2; coinGain: -3; stepsGain: -1 }
-  hologram: { heartGain: 0; coinGain: 0; stepsGain: -100 }
-  gum: { heartGain: 0; coinGain: 3; stepGain: -1 }
-  plum: { heartGain: 0; coinGain: 1; stepGain: -1 }
-}
+export const DefaultTile = { heartGain: 0, coinGain: 0, stepsGain: -1, type: 'DEFAULT' }
+export const BombTile = { heartGain: -2, coinGain: -3, stepsGain: -1, type: 'BOMB' }
+export const HologramTile = { heartGain: 0, coinGain: 0, stepsGain: -100, type: 'HOLOGRAM' }
+export const GumTile = { heartGain: 0, coinGain: 3, stepGain: -1, type: 'GUM' }
+export const PlumTile = { heartGain: 0, coinGain: 1, stepGain: -1, type: 'PLUM' }
+export const HoleTile = { heartGain: 0, coinGain: 0, stepGain: 0, type: 'HOLE' }
+
+export type TileType = DefaultTile | BombTile | HologramTile | GumTile | PlumTile
+
+export type Position = { x: number; y: number }
 
 export type EnvironmentState = {
-  tiles: { type: TileType; position: { x: number; y: number } }[]
-  setTiles: (tiles: { type: TileType; position: { x: number; y: number } }[]) => void
+  tileMap: { type: TileType; position: Position }[]
+  setTileMap: (tiles: { type: TileType; position: Position }[]) => void
   visionCapacity: number
   setVisionCapacity: (visionCapacity: number) => void
-  position: { x: number; y: number }
-  setPosition: (position: { x: number; y: number }) => void
+  position: Position
+  setPosition: (position: Position) => void
 }
