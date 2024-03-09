@@ -1,23 +1,21 @@
 import { animated, config, useSpring, useSprings } from '@react-spring/three'
-import { Center, ContactShadows, Grid, Html, RoundedBox } from '@react-three/drei'
+import { Center, Grid, RoundedBox } from '@react-three/drei'
 import { Player } from './Player'
-import { Fragment, use, useMemo, useRef } from 'react'
-import { Group, Mesh } from 'three'
-import { Button } from '@/components/ui/button'
+import { Fragment, useMemo, useRef } from 'react'
+import { Group } from 'three'
 import { Clone } from './Clone'
 import Bomb from './Bomb'
 import HologramMaterial from './HologramMaterial'
-import { useFrame } from '@react-three/fiber'
 import Gum from './Gum'
 import Plum from './Plum'
-import { Info } from 'lucide-react'
+import RadarField from './RadarField'
 
 export default function Tiles() {
   const AnimatedGrid = animated(Grid)
   const tileCount = 100
   const [springs, _] = useSprings(tileCount, (i) => {
-    const row = Math.floor(i / 10)
-    const col = i % 10
+    const row = Math.floor(i / Math.sqrt(tileCount))
+    const col = i % Math.sqrt(tileCount)
     const centerRow = 4.5
     const centerCol = 4.5
     const distance = Math.sqrt((row - centerRow) ** 2 + (col - centerCol) ** 2)
@@ -64,7 +62,12 @@ export default function Tiles() {
                   >
                     {clone && <Clone position-y={0.5} />}
                     {deathTile && <Bomb position-y={1.3} scale={0.3} />}
-                    {i === startingTile && <Player position-y={0.5} ref={player} />}
+                    {i === startingTile && (
+                      <>
+                        <Player position-y={0.5} ref={player} />
+                        {/* <RadarField /> */}
+                      </>
+                    )}
                     <RoundedBox castShadow receiveShadow args={[1, deathTile ? 2.1 : 0.1, 1]}>
                       {!spike ? (
                         <meshStandardMaterial color={deathTile ? '#FF3D33' : '#3A3D5E'} />
