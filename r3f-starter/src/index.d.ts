@@ -4,6 +4,7 @@ export const HologramTile = { heartGain: 0, coinGain: 0, stepsGain: -100, type: 
 export const GumTile = { heartGain: 0, coinGain: 3, stepGain: -1, type: 'GUM' }
 export const PlumTile = { heartGain: 0, coinGain: 1, stepGain: -1, type: 'PLUM' }
 export const HoleTile = { heartGain: 0, coinGain: 0, stepGain: 0, type: 'HOLE' }
+export const CloneTile = { heartGain: 0, coinGain: 0, stepGain: 0, type: 'CLONE' }
 
 export type TileType = DefaultTile | BombTile | HologramTile | GumTile | PlumTile
 

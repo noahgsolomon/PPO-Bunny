@@ -3,10 +3,9 @@
 import Tiles from './Tiles'
 import dynamic from 'next/dynamic'
 import Lights from './Lights'
-import { Vector3 } from 'three'
-import { Html, OrbitControls, PerspectiveCamera, PresentationControls } from '@react-three/drei'
+import { PerspectiveCamera, PresentationControls } from '@react-three/drei'
 import { Button } from '@/components/ui/button'
-import { ArrowLeft, ArrowRight, Heart, Info, Video, Youtube } from 'lucide-react'
+import { ArrowLeft, ArrowRight, Info } from 'lucide-react'
 import { config } from '@react-spring/three'
 import Image from 'next/image'
 import { Avatar, AvatarImage } from '@/components/ui/avatar'
@@ -23,10 +22,10 @@ export default function Page() {
           enabled
           global
           cursor={false}
-          speed={1}
+          speed={1.5}
           zoom={1}
           rotation={[Math.PI * 0.175, 0, 0]}
-          polar={[0, Math.PI / 2]}
+          polar={[-Math.PI / 16, Math.PI / 3]}
           azimuth={[-Infinity, Infinity]}
           config={config.slow}
         >

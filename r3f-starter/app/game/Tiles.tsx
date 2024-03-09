@@ -1,5 +1,5 @@
 import { animated, config, useSpring, useSprings } from '@react-spring/three'
-import { Center, Grid, RoundedBox } from '@react-three/drei'
+import { Center, Grid, Html, RoundedBox } from '@react-three/drei'
 import { Player } from './Player'
 import { Fragment, useEffect, useMemo, useRef, useState } from 'react'
 import { Group } from 'three'
@@ -10,7 +10,17 @@ import Gum from './Models/Gum'
 import Plum from './Models/Plum'
 import { Perf } from 'r3f-perf'
 import useEnvironment from './store/useEnvironment'
-import { Position, TileType, BombTile, DefaultTile, PlumTile, GumTile, HologramTile, HoleTile } from '@/index.d'
+import {
+  Position,
+  TileType,
+  BombTile,
+  DefaultTile,
+  PlumTile,
+  GumTile,
+  CloneTile,
+  HologramTile,
+  HoleTile,
+} from '@/index.d'
 import RadarField from './RadarField'
 
 export default function Tiles() {
@@ -33,7 +43,7 @@ export default function Tiles() {
 
   const baseSpring = useSpring({
     from: { positionY: -3 },
-    to: { positionY: -0.75 },
+    to: { positionY: -1.4 },
     config: config.gentle,
   })
 
@@ -51,16 +61,18 @@ export default function Tiles() {
           type:
             tile === 'HOLE'
               ? HoleTile
-              : tile === 'HOLOGRAM'
-                ? HologramTile
-                : tile === 'BOMB'
-                  ? BombTile
-                  : tile === 'GUM'
-                    ? GumTile
-                    : tile === 'PLUM'
-                      ? PlumTile
-                      : DefaultTile,
-          position: { x: 0, y: 0 },
+              : tile === 'CLONE'
+                ? CloneTile
+                : tile === 'HOLOGRAM'
+                  ? HologramTile
+                  : tile === 'BOMB'
+                    ? BombTile
+                    : tile === 'GUM'
+                      ? GumTile
+                      : tile === 'PLUM'
+                        ? PlumTile
+                        : DefaultTile,
+          position: { x: i % 10, y: Math.floor(i / 10) },
         })
         return acc
       },
@@ -69,17 +81,12 @@ export default function Tiles() {
     environment.setTileMap(newTileMap)
   }, [])
 
-  useEffect(() => {
-    console.log(environment.tileMap)
-  }, [environment])
-
   return (
     <>
       <Perf />
       <Center top position-y={0.3}>
         {springs.map((props, i) => {
           const tile = environment.tileMap[i]?.type.type
-
           return (
             <Fragment key={i}>
               {tile !== 'HOLE' ? (
@@ -139,7 +146,7 @@ export default function Tiles() {
 const generateTiles = (i: number, startingTile: number) => {
   const deathTile = Math.random() > 0.95 && i !== startingTile
   const clone = Math.random() > 0.98 && i !== startingTile && !deathTile
-  const plum = i !== startingTile && !clone && !deathTile && Math.random() > 0.9
+  const plum = i !== startingTile && !clone && !deathTile && Math.random() > 0.8
   const gum = plum && Math.random() > 0.8
   const hologram = i !== startingTile && !deathTile && !plum && !gum && !clone && Math.random() < 0.1
   const hole = Math.random() < 0.2
