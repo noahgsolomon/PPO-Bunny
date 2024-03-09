@@ -1,8 +1,8 @@
 import { animated, config, useSpring } from '@react-spring/three'
 import { useCursor } from '@react-three/drei'
 import { forwardRef, useState } from 'react'
-import Bunny from './Bunny'
-import Heart from './Heart'
+import Bunny from './Models/Bunny'
+import Heart from './Models/Heart'
 
 export const Player = forwardRef<any, any>((props, ref) => {
   const [hovered, setHovered] = useState(false)

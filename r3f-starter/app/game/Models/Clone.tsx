@@ -1,6 +1,6 @@
 import { useCursor } from '@react-three/drei'
 import { forwardRef, useState } from 'react'
-import CloneBunny from './CloneBunny'
+import CloneBunny from '../CloneBunny'
 
 export const Clone = forwardRef<any, any>((props, ref) => {
   const [hovered, setHovered] = useState(false)

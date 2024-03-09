@@ -1,6 +1,6 @@
 import { AdditiveBlending, Color, DoubleSide, ShaderMaterial, Uniform } from 'three'
-import { fragment } from './hologram/fragment'
-import { vertex } from './hologram/vertex'
+import { fragment } from './shaders/hologram/fragment'
+import { vertex } from './shaders/hologram/vertex'
 import { useFrame } from '@react-three/fiber'
 
 export default function HologramMaterial() {

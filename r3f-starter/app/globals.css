@@ -85,3 +85,8 @@
     overflow: hidden;
   }
 }
+
+image {
+  width: auto;
+  height: auto;
+}
