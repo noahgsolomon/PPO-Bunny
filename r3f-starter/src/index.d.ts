@@ -10,15 +10,22 @@ export type TileType = DefaultTile | BombTile | HologramTile | GumTile | PlumTil
 
 export type Position = { x: number; y: number }
 
-export type EnvironmentState = {
+export type AgentEnvironment = {
   tileMap: { type: TileType; position: Position }[]
-  setTileMap: (tiles: { type: TileType; position: Position }[]) => void
+  setTileMap: (tiles: { type: TileType; position: Position }[], i: number) => void
   visionCapacity: number
-  setVisionCapacity: (visionCapacity: number) => void
+  setVisionCapacity: (visionCapacity: number, i: number) => void
   position: Position
-  setPosition: (position: Position) => void
+  setPosition: (position: Position, i: number) => void
   startingSteps: number
-  setStartingSteps: (staringSteps: number) => void
+  setStartingSteps: (staringSteps: number, i: number) => void
   coins: number
-  setCoins: (coins: number) => void
+  setCoins: (coins: number, i: number) => void
+}
+
+export type EnvironmentState = {
+  agentEnvironment: AgentEnvironment[]
+  setAgentEnvironment: (agentEnvironment: AgentEnvironment, i: number) => void
+  currentAgentIdx: number
+  setCurrentAgentIdx: (currentAgentIdx: number) => void
 }
