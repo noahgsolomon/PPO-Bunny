@@ -53,6 +53,8 @@ export default function Tiles() {
   }, [])
 
   useEffect(() => {
+    // const tileMaps = []
+    // for (let i = 0; i < NUM_AGENTS; i++) {
     const newTileMap = springs.reduce(
       (acc, _, i) => {
         const { tile } = generateTiles(i, agentTiles)
@@ -75,12 +77,12 @@ export default function Tiles() {
       },
       [] as { type: TileType; position: Position }[],
     )
-    environment.setCurrentAgentIdx(agentTiles[0])
+    // tileMaps.push(newTileMap)
+    // }
+
+    environment.setCurrentAgentIdx(0)
     for (let i = 0; i < NUM_AGENTS; i++) {
-      console.log(newTileMap)
-
       environment.agentEnvironment[i].setTileMap(newTileMap, i)
-
       environment.agentEnvironment[i].setPosition(
         {
           x: agentTiles[i] % Math.sqrt(TILE_COUNT),
@@ -91,16 +93,18 @@ export default function Tiles() {
     }
   }, [])
 
-  useEffect(() => {
-    console.log(environment.agentEnvironment[0])
-  }, [environment])
+  // useEffect(() => {
+  //   setTimeout(() => {
+  //     environment.setCurrentAgentIdx(3)
+  //   }, 5000)
+  // }, [])
 
   return (
     <>
       {/* <Perf /> */}
       <Center top position-y={0.3}>
         {springs.map((props, i) => {
-          const tile = environment?.agentEnvironment[0]?.tileMap[i]?.type.type
+          const tile = environment?.agentEnvironment[environment.currentAgentIdx]?.tileMap[i]?.type.type
 
           return (
             <Fragment key={i}>
@@ -117,13 +121,13 @@ export default function Tiles() {
                   {/* <Html>{`[${environment.tileMap[i]?.position.x}, ${environment.tileMap[i]?.position.y}, ${i}]`}</Html> */}
                   {tile === 'BOMB' && <Bomb position-y={1.3} scale={0.3} />}
                   {agentTiles.includes(i) ? (
-                    environment.currentAgentIdx === i ? (
+                    agentTiles[environment.currentAgentIdx] === i ? (
                       <>
                         <Player position-y={0.5} ref={player} />
                         {/* <RadarField /> */}
                       </>
                     ) : (
-                      <Clone position-y={0.5} />
+                      <Clone i={i} position-y={0.5} />
                     )
                   ) : null}
                   <RoundedBox castShadow receiveShadow args={[1, tile === 'BOMB' ? 2.1 : 0.1, 1]}>
