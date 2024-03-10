@@ -4,12 +4,13 @@ import { EnvironmentState, Position, TileType } from '@/index.d'
 const NUM_AGENTS = 5
 
 const useEnvironment = create<EnvironmentState>()((set) => ({
-  agentEnvironment: [...Array(NUM_AGENTS)].map(() => ({
+  agentEnvironment: [...Array(NUM_AGENTS)].map((_, i) => ({
     position: { x: 0, y: 0 },
     tileMap: [],
     visionCapacity: 5,
     startingSteps: 20,
     coins: 0,
+    index: i,
     setPosition: (position: Position, i: number) =>
       set((state) => ({
         agentEnvironment: state.agentEnvironment.map((agent, idx) => (idx === i ? { ...agent, position } : agent)),
@@ -39,6 +40,7 @@ const useEnvironment = create<EnvironmentState>()((set) => ({
     })),
   currentAgentIdx: 0,
   setCurrentAgentIdx: (currentAgentIdx) => set(() => ({ currentAgentIdx })),
+  TILE_COUNT: 100,
 }))
 
 export default useEnvironment

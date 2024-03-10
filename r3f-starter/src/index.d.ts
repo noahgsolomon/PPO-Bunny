@@ -13,6 +13,7 @@ export type Position = { x: number; y: number }
 export type AgentEnvironment = {
   tileMap: { type: TileType; position: Position }[]
   setTileMap: (tiles: { type: TileType; position: Position }[], i: number) => void
+  index: number
   visionCapacity: number
   setVisionCapacity: (visionCapacity: number, i: number) => void
   position: Position
@@ -28,4 +29,5 @@ export type EnvironmentState = {
   setAgentEnvironment: (agentEnvironment: AgentEnvironment, i: number) => void
   currentAgentIdx: number
   setCurrentAgentIdx: (currentAgentIdx: number) => void
+  TILE_COUNT: number
 }
