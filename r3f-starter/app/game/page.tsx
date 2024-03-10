@@ -35,7 +35,7 @@ export default function Page() {
         <PerspectiveCamera makeDefault position={[0, 0, 25]} />
       </View>
       <div className='z-10 absolute top-8 text-center w-full flex items-center flex-col gap-4'>
-        <h1 className=' font-bold italic text-4xl'>Bunny Bananza</h1>
+        <h1 className=' font-bold italic text-4xl'>Bunny Bonanza</h1>
         <div className='flex flex-row gap-2'>
           <Button size='lg'>Play</Button>
           <Button size='lg' className='flex flex-row gap-2 ' variant='outline'>
@@ -43,12 +43,12 @@ export default function Page() {
           </Button>
         </div>
       </div>
-      <Button disabled variant='none' className='z-10 absolute right-10 top-1/2 transform -translate-y-1/2'>
+      {/* <Button disabled variant='none' className='z-10 absolute right-10 top-1/2 transform -translate-y-1/2'>
         <ArrowRight className='w-10 h-10' />
       </Button>
       <Button disabled variant='none' className='z-10 absolute left-10 top-1/2 transform -translate-y-1/2'>
         <ArrowLeft className='w-10 h-10' />
-      </Button>
+      </Button> */}
       <div className='absolute z-10 left-12 top-12 flex flex-row gap-2 items-center'>
         <Avatar className='border-[5px] border-blue-500 outline-2 w-16 h-16'>
           <AvatarImage src='/bunnypfp.png' />
