@@ -1,3 +1,5 @@
+'use client'
+
 import { animated, config, useSpring, useSprings } from '@react-spring/three'
 import { Center, Grid, Html, RoundedBox } from '@react-three/drei'
 import { Player } from './Player'
@@ -10,25 +12,16 @@ import Gum from './Models/Gum'
 import Plum from './Models/Plum'
 import { Perf } from 'r3f-perf'
 import useEnvironment from './store/useEnvironment'
-import {
-  Position,
-  TileType,
-  BombTile,
-  DefaultTile,
-  PlumTile,
-  GumTile,
-  CloneTile,
-  HologramTile,
-  HoleTile,
-} from '@/index.d'
-import RadarField from './RadarField'
+import { Position, TileType, BombTile, DefaultTile, PlumTile, GumTile, HologramTile, HoleTile } from '@/index.d'
 
 export default function Tiles() {
   const AnimatedGrid = animated(Grid)
-  const tileCount = 100
-  const [springs, _] = useSprings(tileCount, (i) => {
-    const row = Math.floor(i / Math.sqrt(tileCount))
-    const col = i % Math.sqrt(tileCount)
+  const TILE_COUNT = 100
+  const NUM_AGENTS = 5
+
+  const [springs, _] = useSprings(TILE_COUNT, (i) => {
+    const row = Math.floor(i / Math.sqrt(TILE_COUNT))
+    const col = i % Math.sqrt(TILE_COUNT)
     const centerRow = 4.5
     const centerCol = 4.5
     const distance = Math.sqrt((row - centerRow) ** 2 + (col - centerCol) ** 2)
@@ -43,54 +36,72 @@ export default function Tiles() {
 
   const baseSpring = useSpring({
     from: { positionY: -3 },
-    to: { positionY: -1.4 },
+    to: { positionY: -2 },
     config: config.gentle,
   })
 
   const player = useRef<Group>()
 
-  const startingTile = useMemo(() => Math.round(Math.random() * tileCount - 1), [])
-
   const environment = useEnvironment()
+
+  const agentTiles = useMemo(() => {
+    const randTiles = []
+    for (let i = 0; i < NUM_AGENTS; i++) {
+      randTiles.push(Math.round(Math.random() * TILE_COUNT - 1))
+    }
+    return randTiles
+  }, [])
 
   useEffect(() => {
     const newTileMap = springs.reduce(
       (acc, _, i) => {
-        const { tile } = generateTiles(i, startingTile)
+        const { tile } = generateTiles(i, agentTiles)
         acc.push({
           type:
             tile === 'HOLE'
               ? HoleTile
-              : tile === 'CLONE'
-                ? CloneTile
-                : tile === 'HOLOGRAM'
-                  ? HologramTile
-                  : tile === 'BOMB'
-                    ? BombTile
-                    : tile === 'GUM'
-                      ? GumTile
-                      : tile === 'PLUM'
-                        ? PlumTile
-                        : DefaultTile,
-          position: { x: i % Math.sqrt(tileCount), y: Math.floor(i / Math.sqrt(tileCount)) },
+              : tile === 'HOLOGRAM'
+                ? HologramTile
+                : tile === 'BOMB'
+                  ? BombTile
+                  : tile === 'GUM'
+                    ? GumTile
+                    : tile === 'PLUM'
+                      ? PlumTile
+                      : DefaultTile,
+          position: { x: i % Math.sqrt(TILE_COUNT), y: Math.floor(i / Math.sqrt(TILE_COUNT)) },
         })
         return acc
       },
       [] as { type: TileType; position: Position }[],
     )
-    environment.setTileMap(newTileMap)
-    environment.setPosition({
-      x: startingTile % Math.sqrt(tileCount),
-      y: Math.floor(startingTile / Math.sqrt(tileCount)),
-    })
+    environment.setCurrentAgentIdx(agentTiles[0])
+    for (let i = 0; i < NUM_AGENTS; i++) {
+      console.log(newTileMap)
+
+      environment.agentEnvironment[i].setTileMap(newTileMap, i)
+
+      environment.agentEnvironment[i].setPosition(
+        {
+          x: agentTiles[i] % Math.sqrt(TILE_COUNT),
+          y: Math.floor(agentTiles[i] / Math.sqrt(TILE_COUNT)),
+        },
+        i,
+      )
+    }
   }, [])
+
+  useEffect(() => {
+    console.log(environment.agentEnvironment[0])
+  }, [environment])
 
   return (
     <>
-      <Perf />
+      {/* <Perf /> */}
       <Center top position-y={0.3}>
         {springs.map((props, i) => {
-          const tile = environment.tileMap[i]?.type.type
+          const tile = environment?.agentEnvironment[0]?.tileMap[i]?.type.type
+
           return (
             <Fragment key={i}>
               {tile !== 'HOLE' ? (
@@ -98,20 +109,23 @@ export default function Tiles() {
                   scale={props.scale}
                   key={i}
                   position={[
-                    (i % Math.sqrt(tileCount)) * 1.1,
+                    (i % Math.sqrt(TILE_COUNT)) * 1.1,
                     tile === 'BOMB' ? 0 : 1,
-                    Math.floor(i / Math.sqrt(tileCount)) * 1.1,
+                    Math.floor(i / Math.sqrt(TILE_COUNT)) * 1.1,
                   ]}
                 >
                   {/* <Html>{`[${environment.tileMap[i]?.position.x}, ${environment.tileMap[i]?.position.y}, ${i}]`}</Html> */}
-                  {tile === 'CLONE' && <Clone position-y={0.5} />}
                   {tile === 'BOMB' && <Bomb position-y={1.3} scale={0.3} />}
-                  {i === startingTile && (
-                    <>
-                      <Player position-y={0.5} ref={player} />
-                      {/* <RadarField /> */}
-                    </>
-                  )}
+                  {agentTiles.includes(i) ? (
+                    environment.currentAgentIdx === i ? (
+                      <>
+                        <Player position-y={0.5} ref={player} />
+                        {/* <RadarField /> */}
+                      </>
+                    ) : (
+                      <Clone position-y={0.5} />
+                    )
+                  ) : null}
                   <RoundedBox castShadow receiveShadow args={[1, tile === 'BOMB' ? 2.1 : 0.1, 1]}>
                     {tile !== 'HOLOGRAM' ? (
                       <meshStandardMaterial color={tile === 'BOMB' ? '#FF3D33' : '#3A3D5E'} />
@@ -148,28 +162,26 @@ export default function Tiles() {
   )
 }
 
-const generateTiles = (i: number, startingTile: number) => {
-  const deathTile = Math.random() > 0.95 && i !== startingTile
-  const clone = Math.random() > 0.98 && i !== startingTile && !deathTile
-  const plum = i !== startingTile && !clone && !deathTile && Math.random() > 0.8
+const generateTiles = (i: number, agentTiles: number[]) => {
+  const deathTile = Math.random() > 0.95 && !agentTiles.includes(i)
+  const clone = Math.random() > 0.98 && !agentTiles.includes(i) && !deathTile
+  const plum = !agentTiles.includes(i) && !clone && !deathTile && Math.random() > 0.8
   const gum = plum && Math.random() > 0.8
-  const hologram = i !== startingTile && !deathTile && !plum && !gum && !clone && Math.random() < 0.1
+  const hologram = !agentTiles.includes(i) && !deathTile && !plum && !gum && !clone && Math.random() < 0.1
   const hole = Math.random() < 0.2
 
   const tile =
-    i !== startingTile && hole
+    !agentTiles.includes(i) && hole
       ? 'HOLE'
-      : clone
-        ? 'CLONE'
-        : hologram
-          ? 'HOLOGRAM'
-          : deathTile
-            ? 'BOMB'
-            : gum
-              ? 'GUM'
-              : plum
-                ? 'PLUM'
-                : 'DEFAULT'
+      : hologram
+        ? 'HOLOGRAM'
+        : deathTile
+          ? 'BOMB'
+          : gum
+            ? 'GUM'
+            : plum
+              ? 'PLUM'
+              : 'DEFAULT'
 
   return {
     tile,
