@@ -22,6 +22,8 @@ export type AgentEnvironment = {
   setStartingSteps: (staringSteps: number, i: number) => void
   coins: number
   setCoins: (coins: number, i: number) => void
+  hearts: number
+  setHearts: (hearts: number, i: number) => void
 }
 
 export type EnvironmentState = {

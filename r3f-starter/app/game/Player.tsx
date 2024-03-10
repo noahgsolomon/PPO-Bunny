@@ -3,6 +3,8 @@ import { useCursor } from '@react-three/drei'
 import { forwardRef, useState } from 'react'
 import Bunny from './Models/Bunny'
 import Heart from './Models/Heart'
+import useEnvironment from './store/useEnvironment'
+import { env } from 'process'
 
 export const Player = forwardRef<any, any>((props, ref) => {
   const [hovered, setHovered] = useState(false)
@@ -17,12 +19,14 @@ export const Player = forwardRef<any, any>((props, ref) => {
     config: config.gentle,
   })
 
+  const environment = useEnvironment()
+
   return (
     <group ref={ref} {...props}>
       <animated.group position-y={positionY} scale={scale}>
-        <Heart position-y={0.8} position-x={-0.4} />
-        <Heart position-y={0.8} position-x={0} />
-        <Heart position-y={0.8} position-x={0.4} />
+        {[...Array(environment.agentEnvironment[environment.currentAgentIdx].hearts)].map((_, i) => (
+          <Heart position-y={0.8} position-x={-0.4 + 0.4 * i} />
+        ))}
       </animated.group>
       <animated.group
         rotation-y={rotation}
