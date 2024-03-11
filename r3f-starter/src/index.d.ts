@@ -18,12 +18,18 @@ export type AgentEnvironment = {
   setVisionCapacity: (visionCapacity: number, i: number) => void
   position: Position
   setPosition: (position: Position, i: number) => void
-  startingSteps: number
-  setStartingSteps: (staringSteps: number, i: number) => void
+  steps: number
+  setSteps: (steps: number, i: number) => void
   coins: number
   setCoins: (coins: number, i: number) => void
   hearts: number
   setHearts: (hearts: number, i: number) => void
+  rotation: number
+  setRotation: (rotation: number, i: number) => void
+  positionZ: number
+  setPositionZ: (positionZ: number, i: number) => void
+  positionX: number
+  setPositionX: (positionX: number, i: number) => void
 }
 
 export type EnvironmentState = {
@@ -32,4 +38,9 @@ export type EnvironmentState = {
   currentAgentIdx: number
   setCurrentAgentIdx: (currentAgentIdx: number) => void
   TILE_COUNT: number
+}
+
+export type GameState = {
+  state: string
+  setState: (state: string) => void
 }

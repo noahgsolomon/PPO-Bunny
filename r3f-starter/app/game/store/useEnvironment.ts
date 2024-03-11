@@ -4,14 +4,30 @@ import { EnvironmentState, Position, TileType } from '@/index.d'
 const NUM_AGENTS = 5
 
 const useEnvironment = create<EnvironmentState>()((set) => ({
+  TILE_COUNT: 100,
   agentEnvironment: [...Array(NUM_AGENTS)].map((_, i) => ({
     position: { x: 0, y: 0 },
     tileMap: [],
     visionCapacity: 5,
-    startingSteps: 20,
+    steps: 20,
     coins: 0,
     index: i,
     hearts: 3,
+    positionX: 0,
+    positionZ: 0,
+    rotation: 0,
+    setPositionX: (positionX: number, i: number) =>
+      set((state) => ({
+        agentEnvironment: state.agentEnvironment.map((agent, idx) => (idx === i ? { ...agent, positionX } : agent)),
+      })),
+    setPositionZ: (positionZ: number, i: number) =>
+      set((state) => ({
+        agentEnvironment: state.agentEnvironment.map((agent, idx) => (idx === i ? { ...agent, positionZ } : agent)),
+      })),
+    setRotation: (rotation: number, i: number) =>
+      set((state) => ({
+        agentEnvironment: state.agentEnvironment.map((agent, idx) => (idx === i ? { ...agent, rotation } : agent)),
+      })),
     setHearts: (hearts: number, i: number) =>
       set((state) => ({
         agentEnvironment: state.agentEnvironment.map((agent, idx) => (idx === i ? { ...agent, hearts } : agent)),
@@ -30,9 +46,9 @@ const useEnvironment = create<EnvironmentState>()((set) => ({
           idx === i ? { ...agent, visionCapacity } : agent,
         ),
       })),
-    setStartingSteps: (startingSteps: number, i: number) =>
+    setSteps: (steps: number, i: number) =>
       set((state) => ({
-        agentEnvironment: state.agentEnvironment.map((agent, idx) => (idx === i ? { ...agent, startingSteps } : agent)),
+        agentEnvironment: state.agentEnvironment.map((agent, idx) => (idx === i ? { ...agent, steps } : agent)),
       })),
     setCoins: (coins: number, i: number) =>
       set((state) => ({
@@ -45,7 +61,6 @@ const useEnvironment = create<EnvironmentState>()((set) => ({
     })),
   currentAgentIdx: 0,
   setCurrentAgentIdx: (currentAgentIdx) => set(() => ({ currentAgentIdx })),
-  TILE_COUNT: 100,
 }))
 
 export default useEnvironment
