@@ -14,6 +14,7 @@ import useEnvironment from './store/useEnvironment'
 import { Position, TileType, BombTile, DefaultTile, PlumTile, GumTile, HologramTile, HoleTile } from '@/index.d'
 import { ArrowDown, ArrowLeft, ArrowRight, ArrowUp } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { Perf } from 'r3f-perf'
 
 export default function Tiles() {
   const AnimatedGrid = animated(Grid)
@@ -70,7 +71,7 @@ export default function Tiles() {
               : tile === 'HOLOGRAM'
                 ? HologramTile
                 : tile === 'BOMB'
-                  ? BombTile
+                  ? structuredClone(BombTile)
                   : tile === 'GUM'
                     ? GumTile
                     : tile === 'PLUM'
@@ -100,6 +101,13 @@ export default function Tiles() {
     }
   }, [])
 
+  const [movement, movementApi] = useSprings(NUM_AGENTS, (i) => ({
+    positionX: environment.agentEnvironment[i].positionX,
+    positionZ: environment.agentEnvironment[i].positionZ,
+    rotation: environment.agentEnvironment[i].rotation,
+    config: config.gentle,
+  }))
+
   const move = (direction: 'left' | 'right' | 'up' | 'down') => {
     const currentAgentIdx = environment.currentAgentIdx
     const agent = environment.agentEnvironment[currentAgentIdx]
@@ -119,10 +127,13 @@ export default function Tiles() {
           positionX = agent.positionX - 1.1
           rotation = -Math.PI * 0.5
 
-          if (nextTileType.type.type === 'BOMB') {
+          if (nextTileType.type.type === 'BOMB' && nextTileType.type.enabled) {
             agent.setHearts(Math.max(agent.hearts - 2, 0), currentAgentIdx)
             agent.setCoins(agent.coins - 3, currentAgentIdx)
-            nextTileType.type = { heartGain: 0, coinGain: 0, stepsGain: -1, type: 'DEFAULT' }
+            nextTileType.type.enabled = false
+          } else if (nextTileType.type.type === 'HOLOGRAM') {
+            agent.setHearts(0, currentAgentIdx)
+            agent.setPositionY(-1.4, currentAgentIdx)
           }
 
           movementApi.start((i) => {
@@ -150,10 +161,13 @@ export default function Tiles() {
           positionX = agent.positionX + 1.1
           rotation = Math.PI * 0.5
 
-          if (nextTileType.type.type === 'BOMB') {
+          if (nextTileType.type.type === 'BOMB' && nextTileType.type.enabled) {
             agent.setHearts(Math.max(agent.hearts - 2, 0), currentAgentIdx)
             agent.setCoins(agent.coins - 3, currentAgentIdx)
-            nextTileType.type = { heartGain: 0, coinGain: 0, stepsGain: -1, type: 'DEFAULT' }
+            nextTileType.type.enabled = false
+          } else if (nextTileType.type.type === 'HOLOGRAM') {
+            agent.setHearts(0, currentAgentIdx)
+            agent.setPositionY(-1.4, currentAgentIdx)
           }
 
           movementApi.start((i) => {
@@ -181,10 +195,13 @@ export default function Tiles() {
           positionZ = agent.positionZ - 1.1
           rotation = Math.PI
 
-          if (nextTileType.type.type === 'BOMB') {
+          if (nextTileType.type.type === 'BOMB' && nextTileType.type.enabled) {
             agent.setHearts(Math.max(agent.hearts - 2, 0), currentAgentIdx)
             agent.setCoins(agent.coins - 3, currentAgentIdx)
-            nextTileType.type = { heartGain: 0, coinGain: 0, stepsGain: -1, type: 'DEFAULT' }
+            nextTileType.type.enabled = false
+          } else if (nextTileType.type.type === 'HOLOGRAM') {
+            agent.setHearts(0, currentAgentIdx)
+            agent.setPositionY(-1.4, currentAgentIdx)
           }
 
           movementApi.start((i) => {
@@ -212,10 +229,13 @@ export default function Tiles() {
           positionZ = agent.positionZ + 1.1
           rotation = 0
 
-          if (nextTileType.type.type === 'BOMB') {
+          if (nextTileType.type.type === 'BOMB' && nextTileType.type.enabled) {
             agent.setHearts(Math.max(agent.hearts - 2, 0), currentAgentIdx)
             agent.setCoins(agent.coins - 3, currentAgentIdx)
-            nextTileType.type = { heartGain: 0, coinGain: 0, stepsGain: -1, type: 'DEFAULT' }
+            nextTileType.type.enabled = false
+          } else if (nextTileType.type.type === 'HOLOGRAM') {
+            agent.setHearts(0, currentAgentIdx)
+            agent.setPositionY(-1.4, currentAgentIdx)
           }
 
           movementApi.start((i) => {
@@ -234,33 +254,27 @@ export default function Tiles() {
     }
   }
 
-  const [movement, movementApi] = useSprings(NUM_AGENTS, (i) => ({
-    positionX: environment.agentEnvironment[i].positionX,
-    positionZ: environment.agentEnvironment[i].positionZ,
-    rotation: environment.agentEnvironment[i].rotation,
-    config: config.gentle,
-  }))
-
   return (
     <>
-      {/* <Perf /> */}
+      <Perf />
       <Center top position-y={0.3}>
         {springs.map((props, i) => {
-          const tile = environment?.agentEnvironment[environment.currentAgentIdx]?.tileMap[i]?.type.type
+          const tile = environment?.agentEnvironment[environment.currentAgentIdx]?.tileMap[i]
+          const tileType = tile?.type.type
 
           return (
             <Fragment key={i}>
-              {tile !== 'HOLE' ? (
+              {tileType !== 'HOLE' ? (
                 <animated.mesh
                   scale={props.scale}
                   key={i}
                   position={[
                     (i % Math.sqrt(TILE_COUNT)) * 1.1,
-                    tile === 'BOMB' ? 0 : 1,
+                    tileType === 'BOMB' ? 0 : 1,
                     Math.floor(i / Math.sqrt(TILE_COUNT)) * 1.1,
                   ]}
                 >
-                  {tile === 'BOMB' && <Bomb position-y={1.3} scale={0.3} />}
+                  {tileType === 'BOMB' && tile.type.enabled && <Bomb position-y={1.3} scale={0.3} />}
                   {agentTiles.includes(i) ? (
                     agentTiles[environment.currentAgentIdx] === i ? (
                       <>
@@ -268,23 +282,23 @@ export default function Tiles() {
                           rotation-y={movement[environment.currentAgentIdx].rotation}
                           position-x={movement[environment.currentAgentIdx].positionX}
                           position-z={movement[environment.currentAgentIdx].positionZ}
-                          position-y={0.5}
+                          position-y={environment.agentEnvironment[environment.currentAgentIdx].positionY}
                           ref={player}
                         />
                         {/* <RadarField /> */}
                       </>
                     ) : (
-                      <Clone movement={movement} i={i} position-y={0.5} />
+                      <Clone movement={movement} i={i} />
                     )
                   ) : null}
-                  <RoundedBox castShadow receiveShadow args={[1, tile === 'BOMB' ? 2.1 : 0.1, 1]}>
-                    {tile !== 'HOLOGRAM' ? (
-                      <meshStandardMaterial color={tile === 'BOMB' ? '#FF3D33' : '#3A3D5E'} />
+                  <RoundedBox castShadow receiveShadow args={[1, tileType === 'BOMB' ? 2.1 : 0.1, 1]}>
+                    {tileType !== 'HOLOGRAM' ? (
+                      <meshStandardMaterial color={tileType === 'BOMB' ? '#FF3D33' : '#3A3D5E'} />
                     ) : (
                       <HologramMaterial />
                     )}
                   </RoundedBox>
-                  {tile === 'GUM' ? <Gum /> : tile === 'PLUM' ? <Plum /> : null}
+                  {tileType === 'GUM' ? <Gum /> : tileType === 'PLUM' ? <Plum /> : null}
                 </animated.mesh>
               ) : null}
             </Fragment>
