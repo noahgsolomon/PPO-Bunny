@@ -44,6 +44,42 @@ export type EnvironmentState = {
   TILE_COUNT: number
 }
 
+export type TileState = {
+  heartGain: number
+  coinGain: number
+  stepGain: number
+  // the 3 above should all be multiplied by some distance significance factor of (vision_length/(vision_length-1+distance))
+  dirX: number
+  dirY: number
+}
+
+export type State = {
+  tileState: TileState[]
+  normalizedHeartsRemaining: number
+  normalizedStepsRemaining: number
+}
+
+export type Action = {
+  index: number
+  name: 'left' | 'right' | 'up' | 'down'
+}
+
+export type AgentObservation = {
+  agentIdx: number
+  state: State
+  action: Action
+  actionOldProbability: number
+  actionNewProbability: number
+  rewards: number[]
+}
+
+export type ObservationState = {
+  agentObservation: AgentObservation[]
+  setAgentObservation: (agentObservation: AgentObservation, i: number) => void
+  discountFactor: number
+  visionLength: number
+}
+
 export type GameState = {
   state: string
   setState: (state: string) => void
