@@ -16,7 +16,12 @@ const useEnvironment = create<EnvironmentState>()((set) => ({
     hearts: 3,
     positionX: 0,
     positionZ: 0,
+    positionY: 0.5,
     rotation: 0,
+    setPositionY: (positionY: number, i: number) =>
+      set((state) => ({
+        agentEnvironment: state.agentEnvironment.map((agent, idx) => (idx === i ? { ...agent, positionY } : agent)),
+      })),
     setStartingTile: (startingTile: number) =>
       set((state) => ({
         agentEnvironment: state.agentEnvironment.map((agent, idx) => (idx === i ? { ...agent, startingTile } : agent)),

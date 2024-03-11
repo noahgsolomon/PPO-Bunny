@@ -1,5 +1,5 @@
 export const DefaultTile = { heartGain: 0, coinGain: 0, stepsGain: -1, type: 'DEFAULT' }
-export const BombTile = { heartGain: -2, coinGain: -3, stepsGain: -1, type: 'BOMB' }
+export const BombTile = { heartGain: -2, coinGain: -3, stepsGain: -1, type: 'BOMB', enabled: true }
 export const HologramTile = { heartGain: 0, coinGain: 0, stepsGain: -100, type: 'HOLOGRAM' }
 export const GumTile = { heartGain: 0, coinGain: 3, stepGain: -1, type: 'GUM' }
 export const PlumTile = { heartGain: 0, coinGain: 1, stepGain: -1, type: 'PLUM' }
@@ -30,6 +30,8 @@ export type AgentEnvironment = {
   setPositionZ: (positionZ: number, i: number) => void
   positionX: number
   setPositionX: (positionX: number, i: number) => void
+  positionY: number
+  setPositionY: (positionY: number, i: number) => void
   startingTile: number
   setStartingTile: (startingTile: number) => void
 }

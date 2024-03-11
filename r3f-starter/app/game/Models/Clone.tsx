@@ -32,6 +32,7 @@ export const Clone = forwardRef<any, CloneProps>(({ i, movement, ...groupProps }
     <animated.group
       position-x={movement[agent.index].positionX}
       position-z={movement[agent.index].positionZ}
+      position-y={agent.positionY}
       rotation-y={movement[agent.index].rotation}
       ref={ref}
       {...groupProps}
