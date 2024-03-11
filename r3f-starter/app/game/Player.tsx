@@ -1,5 +1,5 @@
 import { animated, config, useSpring } from '@react-spring/three'
-import { useCursor } from '@react-three/drei'
+import { Html, Text3D, useCursor } from '@react-three/drei'
 import { forwardRef, useState } from 'react'
 import Bunny from './Models/Bunny'
 import Heart from './Models/Heart'
@@ -26,6 +26,11 @@ export const Player = forwardRef<any, any>((props, ref) => {
         {[...Array(environment.agentEnvironment[environment.currentAgentIdx].hearts)].map((_, i) => (
           <Heart key={i} position-y={0.8} position-x={-0.4 + 0.4 * i} />
         ))}
+        {environment.agentEnvironment[environment.currentAgentIdx].steps && (
+          <Text3D position-y={1.2} position-x={-0.3} size={0.4} font={'/roboto.json'}>
+            {environment.agentEnvironment[environment.currentAgentIdx].steps}
+          </Text3D>
+        )}
       </animated.group>
       <animated.group
         rotation-y={rotation}

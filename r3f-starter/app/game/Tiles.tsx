@@ -116,6 +116,8 @@ export default function Tiles() {
 
     let nextTileType, positionX, positionZ, rotation
 
+    if (agent.steps === 0) return
+
     switch (direction) {
       case 'left':
         nextTileType = agent.tileMap[agent.position.x - 1 + Math.sqrt(TILE_COUNT) * agent.position.y]
@@ -129,12 +131,17 @@ export default function Tiles() {
             agent.setHearts(Math.max(agent.hearts + nextTileType.type.heartGain, 0), agentIdx)
             agent.setCoins(agent.coins + nextTileType.type.coinGain, agentIdx)
             nextTileType.type.enabled = false
+            agent.setSteps(agent.steps - 1, agentIdx)
           } else if (nextTileType.type.type === 'HOLOGRAM') {
             agent.setHearts(0, agentIdx)
+            agent.setSteps(0, agentIdx)
             agent.setPositionY(-1.4, agentIdx)
           } else if (nextTileType.type.type === 'GUM' || nextTileType.type.type === 'PLUM') {
+            agent.setSteps(agent.steps - 1, agentIdx)
             agent.setCoins(agent.coins + nextTileType.type.coinGain, agent.index)
             nextTileType.type = DefaultTile
+          } else {
+            agent.setSteps(agent.steps - 1, agentIdx)
           }
 
           movementApi.start((i) => {
@@ -163,12 +170,17 @@ export default function Tiles() {
             agent.setHearts(Math.max(agent.hearts + nextTileType.type.heartGain, 0), agentIdx)
             agent.setCoins(agent.coins + nextTileType.type.coinGain, agentIdx)
             nextTileType.type.enabled = false
+            agent.setSteps(agent.steps - 1, agentIdx)
           } else if (nextTileType.type.type === 'HOLOGRAM') {
             agent.setHearts(0, agentIdx)
+            agent.setSteps(0, agentIdx)
             agent.setPositionY(-1.4, agentIdx)
           } else if (nextTileType.type.type === 'GUM' || nextTileType.type.type === 'PLUM') {
+            agent.setSteps(agent.steps - 1, agentIdx)
             agent.setCoins(agent.coins + nextTileType.type.coinGain, agent.index)
             nextTileType.type = DefaultTile
+          } else {
+            agent.setSteps(agent.steps - 1, agentIdx)
           }
 
           movementApi.start((i) => {
@@ -197,12 +209,17 @@ export default function Tiles() {
             agent.setHearts(Math.max(agent.hearts + nextTileType.type.heartGain, 0), agentIdx)
             agent.setCoins(agent.coins + nextTileType.type.coinGain, agentIdx)
             nextTileType.type.enabled = false
+            agent.setSteps(agent.steps - 1, agentIdx)
           } else if (nextTileType.type.type === 'HOLOGRAM') {
             agent.setHearts(0, agentIdx)
+            agent.setSteps(0, agentIdx)
             agent.setPositionY(-1.4, agentIdx)
           } else if (nextTileType.type.type === 'GUM' || nextTileType.type.type === 'PLUM') {
+            agent.setSteps(agent.steps - 1, agentIdx)
             agent.setCoins(agent.coins + nextTileType.type.coinGain, agent.index)
             nextTileType.type = DefaultTile
+          } else {
+            agent.setSteps(agent.steps - 1, agentIdx)
           }
 
           movementApi.start((i) => {
@@ -231,12 +248,17 @@ export default function Tiles() {
             agent.setHearts(Math.max(agent.hearts + nextTileType.type.heartGain, 0), agentIdx)
             agent.setCoins(agent.coins + nextTileType.type.coinGain, agentIdx)
             nextTileType.type.enabled = false
+            agent.setSteps(agent.steps - 1, agentIdx)
           } else if (nextTileType.type.type === 'HOLOGRAM') {
             agent.setHearts(0, agentIdx)
+            agent.setSteps(0, agentIdx)
             agent.setPositionY(-1.4, agentIdx)
           } else if (nextTileType.type.type === 'GUM' || nextTileType.type.type === 'PLUM') {
+            agent.setSteps(agent.steps - 1, agentIdx)
             agent.setCoins(agent.coins + nextTileType.type.coinGain, agent.index)
             nextTileType.type = DefaultTile
+          } else {
+            agent.setSteps(agent.steps - 1, agentIdx)
           }
 
           movementApi.start((i) => {
