@@ -1,48 +1,60 @@
 'use client'
-
 import { useCursor } from '@react-three/drei'
-import { forwardRef, useState } from 'react'
+import { forwardRef, useEffect, useState } from 'react'
 import CloneBunny from '../CloneBunny'
 import { GroupProps } from '@react-three/fiber'
 import useEnvironment from '../store/useEnvironment'
+import { SpringValue, animated } from '@react-spring/three'
 
 interface CloneProps extends GroupProps {
   i: number
+  movement: {
+    positionY: SpringValue<number>
+    positionX: SpringValue<number>
+    positionZ: SpringValue<number>
+    rotation: SpringValue<number>
+  }[]
 }
 
-export const Clone = forwardRef<any, CloneProps>(({ i, ...groupProps }, ref) => {
+export const Clone = forwardRef<any, CloneProps>(({ i, movement, ...groupProps }, ref) => {
   const [hovered, setHovered] = useState(false)
-
   useCursor(hovered)
-
   const environment = useEnvironment()
-
   const { x, y } = {
     x: i % Math.sqrt(environment.TILE_COUNT),
     y: Math.floor(i / Math.sqrt(environment.TILE_COUNT)),
   }
 
-  return (
-    <group ref={ref} {...groupProps}>
-      <group
-        onClick={() => {
-          const agent = environment.agentEnvironment.filter(
-            (agent) => agent.position.x === x && agent.position.y === y,
-          )[0]
+  const agentsAtCurrentPosition = environment.agentEnvironment.filter(
+    (agent) => agent.position.x === x && agent.position.y === y,
+  )
 
-          environment.setCurrentAgentIdx(agent.index)
-        }}
-        onPointerEnter={(e) => {
-          e.stopPropagation()
-          setHovered(true)
-        }}
-        onPointerLeave={(e) => {
-          e.stopPropagation()
-          setHovered(false)
-        }}
-      >
-        <CloneBunny />
-      </group>
-    </group>
+  if (agentsAtCurrentPosition.length === 0) {
+    return null
+  }
+
+  const agent = agentsAtCurrentPosition[0]
+
+  return (
+    <animated.group
+      position-x={movement[agent.index].positionX}
+      position-z={movement[agent.index].positionZ}
+      rotation-y={movement[agent.index].rotation}
+      ref={ref}
+      {...groupProps}
+      onClick={() => {
+        environment.setCurrentAgentIdx(agent.index)
+      }}
+      onPointerEnter={(e) => {
+        e.stopPropagation()
+        setHovered(true)
+      }}
+      onPointerLeave={(e) => {
+        e.stopPropagation()
+        setHovered(false)
+      }}
+    >
+      <CloneBunny />
+    </animated.group>
   )
 })
