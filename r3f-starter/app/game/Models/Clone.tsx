@@ -9,7 +9,6 @@ import { SpringValue, animated } from '@react-spring/three'
 interface CloneProps extends GroupProps {
   i: number
   movement: {
-    positionY: SpringValue<number>
     positionX: SpringValue<number>
     positionZ: SpringValue<number>
     rotation: SpringValue<number>
@@ -22,8 +21,6 @@ export const Clone = forwardRef<any, CloneProps>(({ i, movement, ...groupProps }
   const environment = useEnvironment()
 
   const agentsAtCurrentPosition = environment.agentEnvironment.filter((agent) => agent.startingTile === i)
-
-  console.log(environment.agentEnvironment)
 
   if (agentsAtCurrentPosition.length === 0) {
     return null

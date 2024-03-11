@@ -10,16 +10,13 @@ import Bomb from './Models/Bomb'
 import HologramMaterial from './HologramMaterial'
 import Gum from './Models/Gum'
 import Plum from './Models/Plum'
-import { Perf } from 'r3f-perf'
 import useEnvironment from './store/useEnvironment'
 import { Position, TileType, BombTile, DefaultTile, PlumTile, GumTile, HologramTile, HoleTile } from '@/index.d'
-import { button, useControls } from 'leva'
 import { ArrowDown, ArrowLeft, ArrowRight, ArrowUp } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 
 export default function Tiles() {
   const AnimatedGrid = animated(Grid)
-  const AnimatedHtml = animated(Html)
   const TILE_COUNT = 100
   const NUM_AGENTS = 5
 
@@ -90,7 +87,8 @@ export default function Tiles() {
 
     environment.setCurrentAgentIdx(0)
     for (let i = 0; i < NUM_AGENTS; i++) {
-      environment.agentEnvironment[i].setTileMap(newTileMap, i)
+      const clonedTileMap = structuredClone(newTileMap)
+      environment.agentEnvironment[i].setTileMap(clonedTileMap, i)
       environment.agentEnvironment[i].setPosition(
         {
           x: agentTiles[i] % Math.sqrt(TILE_COUNT),
@@ -102,35 +100,143 @@ export default function Tiles() {
     }
   }, [])
 
-  const move = () => {
-    environment.agentEnvironment.map((agent) => {
-      const positionX = agent.positionX - 1.1
-      const rotation = -Math.PI * 0.5
-      movementApi.start((i) => {
-        if (i === agent.index) {
-          return {
-            positionX,
-            rotation,
-            positionY: 0.5,
-          }
-        }
-        return {}
-      })
-      agent.setRotation(rotation, agent.index)
-      agent.setPositionX(positionX, agent.index)
-    })
-  }
+  const move = (direction: 'left' | 'right' | 'up' | 'down') => {
+    const currentAgentIdx = environment.currentAgentIdx
+    const agent = environment.agentEnvironment[currentAgentIdx]
+    const TILE_COUNT = environment.TILE_COUNT
 
-  // useEffect(() => {
-  //   setTimeout(() => {
-  //     environment.setCurrentAgentIdx(3)
-  //   }, 5000)
-  // }, [])
+    let nextTileType, positionX, positionZ, rotation
+
+    switch (direction) {
+      case 'left':
+        nextTileType =
+          environment.agentEnvironment[currentAgentIdx].tileMap[
+            agent.position.x - 1 + Math.sqrt(TILE_COUNT) * agent.position.y
+          ]
+
+        if (agent.position.x - 1 >= 0 && nextTileType.type.type !== 'HOLE') {
+          agent.position.x -= 1
+          positionX = agent.positionX - 1.1
+          rotation = -Math.PI * 0.5
+
+          if (nextTileType.type.type === 'BOMB') {
+            agent.setHearts(Math.max(agent.hearts - 2, 0), currentAgentIdx)
+            agent.setCoins(agent.coins - 3, currentAgentIdx)
+            nextTileType.type = { heartGain: 0, coinGain: 0, stepsGain: -1, type: 'DEFAULT' }
+          }
+
+          movementApi.start((i) => {
+            if (i === currentAgentIdx) {
+              return {
+                positionX,
+                rotation,
+              }
+            }
+            return {}
+          })
+          agent.setRotation(rotation, currentAgentIdx)
+          agent.setPositionX(positionX, currentAgentIdx)
+        }
+        break
+
+      case 'right':
+        nextTileType =
+          environment.agentEnvironment[currentAgentIdx].tileMap[
+            agent.position.x + 1 + Math.sqrt(TILE_COUNT) * agent.position.y
+          ]
+
+        if (agent.position.x + 1 <= Math.sqrt(TILE_COUNT) - 1 && nextTileType.type.type !== 'HOLE') {
+          agent.position.x += 1
+          positionX = agent.positionX + 1.1
+          rotation = Math.PI * 0.5
+
+          if (nextTileType.type.type === 'BOMB') {
+            agent.setHearts(Math.max(agent.hearts - 2, 0), currentAgentIdx)
+            agent.setCoins(agent.coins - 3, currentAgentIdx)
+            nextTileType.type = { heartGain: 0, coinGain: 0, stepsGain: -1, type: 'DEFAULT' }
+          }
+
+          movementApi.start((i) => {
+            if (i === currentAgentIdx) {
+              return {
+                positionX,
+                rotation,
+              }
+            }
+            return {}
+          })
+          agent.setRotation(rotation, currentAgentIdx)
+          agent.setPositionX(positionX, currentAgentIdx)
+        }
+        break
+
+      case 'up':
+        nextTileType =
+          environment.agentEnvironment[currentAgentIdx].tileMap[
+            agent.position.x + Math.sqrt(TILE_COUNT) * (agent.position.y - 1)
+          ]
+
+        if (agent.position.y - 1 >= 0 && nextTileType.type.type !== 'HOLE') {
+          agent.position.y -= 1
+          positionZ = agent.positionZ - 1.1
+          rotation = Math.PI
+
+          if (nextTileType.type.type === 'BOMB') {
+            agent.setHearts(Math.max(agent.hearts - 2, 0), currentAgentIdx)
+            agent.setCoins(agent.coins - 3, currentAgentIdx)
+            nextTileType.type = { heartGain: 0, coinGain: 0, stepsGain: -1, type: 'DEFAULT' }
+          }
+
+          movementApi.start((i) => {
+            if (i === currentAgentIdx) {
+              return {
+                positionZ,
+                rotation,
+              }
+            }
+            return {}
+          })
+          agent.setRotation(rotation, currentAgentIdx)
+          agent.setPositionZ(positionZ, currentAgentIdx)
+        }
+        break
+
+      case 'down':
+        nextTileType =
+          environment.agentEnvironment[currentAgentIdx].tileMap[
+            agent.position.x + Math.sqrt(TILE_COUNT) * (agent.position.y + 1)
+          ]
+
+        if (agent.position.y + 1 <= Math.sqrt(TILE_COUNT) - 1 && nextTileType.type.type !== 'HOLE') {
+          agent.position.y += 1
+          positionZ = agent.positionZ + 1.1
+          rotation = 0
+
+          if (nextTileType.type.type === 'BOMB') {
+            agent.setHearts(Math.max(agent.hearts - 2, 0), currentAgentIdx)
+            agent.setCoins(agent.coins - 3, currentAgentIdx)
+            nextTileType.type = { heartGain: 0, coinGain: 0, stepsGain: -1, type: 'DEFAULT' }
+          }
+
+          movementApi.start((i) => {
+            if (i === currentAgentIdx) {
+              return {
+                positionZ,
+                rotation,
+              }
+            }
+            return {}
+          })
+          agent.setRotation(rotation, currentAgentIdx)
+          agent.setPositionZ(positionZ, currentAgentIdx)
+        }
+        break
+    }
+  }
 
   const [movement, movementApi] = useSprings(NUM_AGENTS, (i) => ({
     positionX: environment.agentEnvironment[i].positionX,
     positionZ: environment.agentEnvironment[i].positionZ,
-    positionY: 0.5,
     rotation: environment.agentEnvironment[i].rotation,
     config: config.gentle,
   }))
@@ -154,18 +260,10 @@ export default function Tiles() {
                     Math.floor(i / Math.sqrt(TILE_COUNT)) * 1.1,
                   ]}
                 >
-                  {/* <Html>{`[${environment.tileMap[i]?.position.x}, ${environment.tileMap[i]?.position.y}, ${i}]`}</Html> */}
                   {tile === 'BOMB' && <Bomb position-y={1.3} scale={0.3} />}
                   {agentTiles.includes(i) ? (
                     agentTiles[environment.currentAgentIdx] === i ? (
                       <>
-                        <AnimatedHtml
-                          position-x={movement[environment.currentAgentIdx].positionX}
-                          position-z={movement[environment.currentAgentIdx].positionZ}
-                          position-y={1}
-                        >
-                          {`[${environment.agentEnvironment[environment.currentAgentIdx].position.x}, ${environment.agentEnvironment[environment.currentAgentIdx].position.y}]`}
-                        </AnimatedHtml>
                         <Player
                           rotation-y={movement[environment.currentAgentIdx].rotation}
                           position-x={movement[environment.currentAgentIdx].positionX}
@@ -213,30 +311,7 @@ export default function Tiles() {
       />
       <Html scale={0.5} position-z={8}>
         <Button
-          onClick={() => {
-            const currentAgentIdx = environment.currentAgentIdx
-            const agent = environment.agentEnvironment[currentAgentIdx]
-            const newPosition = agent.position
-
-            if (newPosition.x - 1 >= 0) {
-              newPosition.x -= 1
-              const positionX = agent.positionX - 1.1
-              const rotation = -Math.PI * 0.5
-              movementApi.start((i) => {
-                if (i === currentAgentIdx) {
-                  return {
-                    positionX,
-                    rotation,
-                    positionY: 0.5,
-                  }
-                }
-                return {}
-              })
-              agent.setRotation(rotation, currentAgentIdx)
-              agent.setPositionX(positionX, currentAgentIdx)
-              agent.setPosition(newPosition, currentAgentIdx)
-            }
-          }}
+          onClick={() => move('left')}
           variant='none'
           className='z-10 absolute right-1/2 bottom-10 transform -translate-y-1/2'
         >
@@ -244,29 +319,7 @@ export default function Tiles() {
         </Button>
 
         <Button
-          onClick={() => {
-            const currentAgentIdx = environment.currentAgentIdx
-            const agent = environment.agentEnvironment[currentAgentIdx]
-            const newPosition = agent.position
-
-            if (newPosition.x + 1 <= Math.sqrt(TILE_COUNT) - 1) {
-              newPosition.x += 1
-              const positionX = agent.positionX + 1.1
-              const rotation = Math.PI * 0.5
-              movementApi.start((i) => {
-                if (i === currentAgentIdx) {
-                  return {
-                    positionX,
-                    rotation,
-                    positionY: 0.5,
-                  }
-                }
-                return {}
-              })
-              agent.setRotation(rotation, currentAgentIdx)
-              agent.setPositionX(positionX, currentAgentIdx)
-            }
-          }}
+          onClick={() => move('right')}
           variant='none'
           className='z-10 absolute left-1/2 bottom-10 transform -translate-y-1/2'
         >
@@ -274,29 +327,7 @@ export default function Tiles() {
         </Button>
 
         <Button
-          onClick={() => {
-            const currentAgentIdx = environment.currentAgentIdx
-            const agent = environment.agentEnvironment[currentAgentIdx]
-            const newPosition = agent.position
-
-            if (newPosition.y - 1 >= 0) {
-              newPosition.y -= 1
-              const positionZ = agent.positionZ - 1.1
-              const rotation = Math.PI
-              movementApi.start((i) => {
-                if (i === currentAgentIdx) {
-                  return {
-                    positionZ,
-                    rotation,
-                    positionY: 0.5,
-                  }
-                }
-                return {}
-              })
-              agent.setRotation(rotation, currentAgentIdx)
-              agent.setPositionZ(positionZ, currentAgentIdx)
-            }
-          }}
+          onClick={() => move('up')}
           variant='none'
           className='z-10 absolute left-1/2 bottom-24 transform -translate-x-1/2'
         >
@@ -304,29 +335,7 @@ export default function Tiles() {
         </Button>
 
         <Button
-          onClick={() => {
-            const currentAgentIdx = environment.currentAgentIdx
-            const agent = environment.agentEnvironment[currentAgentIdx]
-            const newPosition = agent.position
-
-            if (newPosition.y + 1 <= Math.sqrt(TILE_COUNT) - 1) {
-              newPosition.y += 1
-              const positionZ = agent.positionZ + 1.1
-              const rotation = 0
-              movementApi.start((i) => {
-                if (i === currentAgentIdx) {
-                  return {
-                    positionZ,
-                    rotation,
-                    positionY: 0.5,
-                  }
-                }
-                return {}
-              })
-              agent.setRotation(rotation, currentAgentIdx)
-              agent.setPositionZ(positionZ, currentAgentIdx)
-            }
-          }}
+          onClick={() => move('down')}
           variant='none'
           className='z-10 absolute left-1/2 bottom-6 transform -translate-x-1/2'
         >
