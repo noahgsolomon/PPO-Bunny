@@ -30,6 +30,8 @@ export type AgentEnvironment = {
   setPositionZ: (positionZ: number, i: number) => void
   positionX: number
   setPositionX: (positionX: number, i: number) => void
+  startingTile: number
+  setStartingTile: (startingTile: number) => void
 }
 
 export type EnvironmentState = {

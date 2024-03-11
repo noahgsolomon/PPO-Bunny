@@ -12,10 +12,15 @@ const useEnvironment = create<EnvironmentState>()((set) => ({
     steps: 20,
     coins: 0,
     index: i,
+    startingTile: 0,
     hearts: 3,
     positionX: 0,
     positionZ: 0,
     rotation: 0,
+    setStartingTile: (startingTile: number) =>
+      set((state) => ({
+        agentEnvironment: state.agentEnvironment.map((agent, idx) => (idx === i ? { ...agent, startingTile } : agent)),
+      })),
     setPositionX: (positionX: number, i: number) =>
       set((state) => ({
         agentEnvironment: state.agentEnvironment.map((agent, idx) => (idx === i ? { ...agent, positionX } : agent)),

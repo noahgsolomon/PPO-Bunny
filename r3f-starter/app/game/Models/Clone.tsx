@@ -20,14 +20,10 @@ export const Clone = forwardRef<any, CloneProps>(({ i, movement, ...groupProps }
   const [hovered, setHovered] = useState(false)
   useCursor(hovered)
   const environment = useEnvironment()
-  const { x, y } = {
-    x: i % Math.sqrt(environment.TILE_COUNT),
-    y: Math.floor(i / Math.sqrt(environment.TILE_COUNT)),
-  }
 
-  const agentsAtCurrentPosition = environment.agentEnvironment.filter(
-    (agent) => agent.position.x === x && agent.position.y === y,
-  )
+  const agentsAtCurrentPosition = environment.agentEnvironment.filter((agent) => agent.startingTile === i)
+
+  console.log(environment.agentEnvironment)
 
   if (agentsAtCurrentPosition.length === 0) {
     return null

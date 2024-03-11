@@ -19,6 +19,7 @@ import { Button } from '@/components/ui/button'
 
 export default function Tiles() {
   const AnimatedGrid = animated(Grid)
+  const AnimatedHtml = animated(Html)
   const TILE_COUNT = 100
   const NUM_AGENTS = 5
 
@@ -97,8 +98,28 @@ export default function Tiles() {
         },
         i,
       )
+      environment.agentEnvironment[i].setStartingTile(agentTiles[i])
     }
   }, [])
+
+  const move = () => {
+    environment.agentEnvironment.map((agent) => {
+      const positionX = agent.positionX - 1.1
+      const rotation = -Math.PI * 0.5
+      movementApi.start((i) => {
+        if (i === agent.index) {
+          return {
+            positionX,
+            rotation,
+            positionY: 0.5,
+          }
+        }
+        return {}
+      })
+      agent.setRotation(rotation, agent.index)
+      agent.setPositionX(positionX, agent.index)
+    })
+  }
 
   // useEffect(() => {
   //   setTimeout(() => {
@@ -138,6 +159,13 @@ export default function Tiles() {
                   {agentTiles.includes(i) ? (
                     agentTiles[environment.currentAgentIdx] === i ? (
                       <>
+                        <AnimatedHtml
+                          position-x={movement[environment.currentAgentIdx].positionX}
+                          position-z={movement[environment.currentAgentIdx].positionZ}
+                          position-y={1}
+                        >
+                          {`[${environment.agentEnvironment[environment.currentAgentIdx].position.x}, ${environment.agentEnvironment[environment.currentAgentIdx].position.y}]`}
+                        </AnimatedHtml>
                         <Player
                           rotation-y={movement[environment.currentAgentIdx].rotation}
                           position-x={movement[environment.currentAgentIdx].positionX}
@@ -183,24 +211,31 @@ export default function Tiles() {
         fadeStrength={1}
         infiniteGrid
       />
-      <Html>
+      <Html scale={0.5} position-z={8}>
         <Button
           onClick={() => {
             const currentAgentIdx = environment.currentAgentIdx
-            const positionX = environment.agentEnvironment[currentAgentIdx].positionX - 1.1
-            const rotation = -Math.PI * 0.5
-            movementApi.start((i) => {
-              if (i === currentAgentIdx) {
-                return {
-                  positionX,
-                  rotation,
-                  positionY: 0.5,
+            const agent = environment.agentEnvironment[currentAgentIdx]
+            const newPosition = agent.position
+
+            if (newPosition.x - 1 >= 0) {
+              newPosition.x -= 1
+              const positionX = agent.positionX - 1.1
+              const rotation = -Math.PI * 0.5
+              movementApi.start((i) => {
+                if (i === currentAgentIdx) {
+                  return {
+                    positionX,
+                    rotation,
+                    positionY: 0.5,
+                  }
                 }
-              }
-              return {}
-            })
-            environment.agentEnvironment[currentAgentIdx].setRotation(rotation, currentAgentIdx)
-            environment.agentEnvironment[currentAgentIdx].setPositionX(positionX, currentAgentIdx)
+                return {}
+              })
+              agent.setRotation(rotation, currentAgentIdx)
+              agent.setPositionX(positionX, currentAgentIdx)
+              agent.setPosition(newPosition, currentAgentIdx)
+            }
           }}
           variant='none'
           className='z-10 absolute right-1/2 bottom-10 transform -translate-y-1/2'
@@ -211,20 +246,26 @@ export default function Tiles() {
         <Button
           onClick={() => {
             const currentAgentIdx = environment.currentAgentIdx
-            const positionX = environment.agentEnvironment[currentAgentIdx].positionX + 1.1
-            const rotation = Math.PI * 0.5
-            movementApi.start((i) => {
-              if (i === currentAgentIdx) {
-                return {
-                  positionX,
-                  rotation,
-                  positionY: 0.5,
+            const agent = environment.agentEnvironment[currentAgentIdx]
+            const newPosition = agent.position
+
+            if (newPosition.x + 1 <= Math.sqrt(TILE_COUNT) - 1) {
+              newPosition.x += 1
+              const positionX = agent.positionX + 1.1
+              const rotation = Math.PI * 0.5
+              movementApi.start((i) => {
+                if (i === currentAgentIdx) {
+                  return {
+                    positionX,
+                    rotation,
+                    positionY: 0.5,
+                  }
                 }
-              }
-              return {}
-            })
-            environment.agentEnvironment[currentAgentIdx].setRotation(rotation, currentAgentIdx)
-            environment.agentEnvironment[currentAgentIdx].setPositionX(positionX, currentAgentIdx)
+                return {}
+              })
+              agent.setRotation(rotation, currentAgentIdx)
+              agent.setPositionX(positionX, currentAgentIdx)
+            }
           }}
           variant='none'
           className='z-10 absolute left-1/2 bottom-10 transform -translate-y-1/2'
@@ -235,20 +276,26 @@ export default function Tiles() {
         <Button
           onClick={() => {
             const currentAgentIdx = environment.currentAgentIdx
-            const positionZ = environment.agentEnvironment[currentAgentIdx].positionZ - 1.1
-            const rotation = Math.PI
-            movementApi.start((i) => {
-              if (i === currentAgentIdx) {
-                return {
-                  positionZ,
-                  rotation,
-                  positionY: 0.5,
+            const agent = environment.agentEnvironment[currentAgentIdx]
+            const newPosition = agent.position
+
+            if (newPosition.y - 1 >= 0) {
+              newPosition.y -= 1
+              const positionZ = agent.positionZ - 1.1
+              const rotation = Math.PI
+              movementApi.start((i) => {
+                if (i === currentAgentIdx) {
+                  return {
+                    positionZ,
+                    rotation,
+                    positionY: 0.5,
+                  }
                 }
-              }
-              return {}
-            })
-            environment.agentEnvironment[currentAgentIdx].setRotation(rotation, currentAgentIdx)
-            environment.agentEnvironment[currentAgentIdx].setPositionZ(positionZ, currentAgentIdx)
+                return {}
+              })
+              agent.setRotation(rotation, currentAgentIdx)
+              agent.setPositionZ(positionZ, currentAgentIdx)
+            }
           }}
           variant='none'
           className='z-10 absolute left-1/2 bottom-24 transform -translate-x-1/2'
@@ -259,26 +306,33 @@ export default function Tiles() {
         <Button
           onClick={() => {
             const currentAgentIdx = environment.currentAgentIdx
-            const positionZ = environment.agentEnvironment[currentAgentIdx].positionZ + 1.1
-            const rotation = 0
-            movementApi.start((i) => {
-              if (i === currentAgentIdx) {
-                return {
-                  positionZ,
-                  rotation,
-                  positionY: 0.5,
+            const agent = environment.agentEnvironment[currentAgentIdx]
+            const newPosition = agent.position
+
+            if (newPosition.y + 1 <= Math.sqrt(TILE_COUNT) - 1) {
+              newPosition.y += 1
+              const positionZ = agent.positionZ + 1.1
+              const rotation = 0
+              movementApi.start((i) => {
+                if (i === currentAgentIdx) {
+                  return {
+                    positionZ,
+                    rotation,
+                    positionY: 0.5,
+                  }
                 }
-              }
-              return {}
-            })
-            environment.agentEnvironment[currentAgentIdx].setRotation(rotation, currentAgentIdx)
-            environment.agentEnvironment[currentAgentIdx].setPositionZ(positionZ, currentAgentIdx)
+                return {}
+              })
+              agent.setRotation(rotation, currentAgentIdx)
+              agent.setPositionZ(positionZ, currentAgentIdx)
+            }
           }}
           variant='none'
           className='z-10 absolute left-1/2 bottom-6 transform -translate-x-1/2'
         >
           <ArrowDown className='w-10 h-10' />
         </Button>
+        {/* <Button onClick={move}>begin</Button> */}
       </Html>
     </>
   )
