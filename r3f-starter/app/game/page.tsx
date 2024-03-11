@@ -112,7 +112,9 @@ export default function Page() {
         <div className='flex flex-col gap-2'>
           <div className='flex flex-row gap-2 items-center'>
             <Image src={'/coin.webp'} alt='coin' width={24} height={24} />{' '}
-            <span className='text-yellow-500 font-bold text-2xl'>0</span>
+            <span className='text-yellow-500 font-bold text-2xl'>
+              {environment.agentEnvironment[environment.currentAgentIdx].coins}
+            </span>
           </div>
           <div className='flex flex-row'>
             {[...Array(environment.agentEnvironment[environment.currentAgentIdx].hearts)].map((_, i) => (

@@ -111,16 +111,14 @@ export default function Tiles() {
   const move = (direction: 'left' | 'right' | 'up' | 'down') => {
     const currentAgentIdx = environment.currentAgentIdx
     const agent = environment.agentEnvironment[currentAgentIdx]
+    const agentIdx = agent.index
     const TILE_COUNT = environment.TILE_COUNT
 
     let nextTileType, positionX, positionZ, rotation
 
     switch (direction) {
       case 'left':
-        nextTileType =
-          environment.agentEnvironment[currentAgentIdx].tileMap[
-            agent.position.x - 1 + Math.sqrt(TILE_COUNT) * agent.position.y
-          ]
+        nextTileType = agent.tileMap[agent.position.x - 1 + Math.sqrt(TILE_COUNT) * agent.position.y]
 
         if (agent.position.x - 1 >= 0 && nextTileType.type.type !== 'HOLE') {
           agent.position.x -= 1
@@ -128,16 +126,19 @@ export default function Tiles() {
           rotation = -Math.PI * 0.5
 
           if (nextTileType.type.type === 'BOMB' && nextTileType.type.enabled) {
-            agent.setHearts(Math.max(agent.hearts - 2, 0), currentAgentIdx)
-            agent.setCoins(agent.coins - 3, currentAgentIdx)
+            agent.setHearts(Math.max(agent.hearts + nextTileType.type.heartGain, 0), agentIdx)
+            agent.setCoins(agent.coins + nextTileType.type.coinGain, agentIdx)
             nextTileType.type.enabled = false
           } else if (nextTileType.type.type === 'HOLOGRAM') {
-            agent.setHearts(0, currentAgentIdx)
-            agent.setPositionY(-1.4, currentAgentIdx)
+            agent.setHearts(0, agentIdx)
+            agent.setPositionY(-1.4, agentIdx)
+          } else if (nextTileType.type.type === 'GUM' || nextTileType.type.type === 'PLUM') {
+            agent.setCoins(agent.coins + nextTileType.type.coinGain, agent.index)
+            nextTileType.type = DefaultTile
           }
 
           movementApi.start((i) => {
-            if (i === currentAgentIdx) {
+            if (i === agentIdx) {
               return {
                 positionX,
                 rotation,
@@ -145,16 +146,13 @@ export default function Tiles() {
             }
             return {}
           })
-          agent.setRotation(rotation, currentAgentIdx)
-          agent.setPositionX(positionX, currentAgentIdx)
+          agent.setRotation(rotation, agentIdx)
+          agent.setPositionX(positionX, agentIdx)
         }
         break
 
       case 'right':
-        nextTileType =
-          environment.agentEnvironment[currentAgentIdx].tileMap[
-            agent.position.x + 1 + Math.sqrt(TILE_COUNT) * agent.position.y
-          ]
+        nextTileType = agent.tileMap[agent.position.x + 1 + Math.sqrt(TILE_COUNT) * agent.position.y]
 
         if (agent.position.x + 1 <= Math.sqrt(TILE_COUNT) - 1 && nextTileType.type.type !== 'HOLE') {
           agent.position.x += 1
@@ -162,16 +160,19 @@ export default function Tiles() {
           rotation = Math.PI * 0.5
 
           if (nextTileType.type.type === 'BOMB' && nextTileType.type.enabled) {
-            agent.setHearts(Math.max(agent.hearts - 2, 0), currentAgentIdx)
-            agent.setCoins(agent.coins - 3, currentAgentIdx)
+            agent.setHearts(Math.max(agent.hearts + nextTileType.type.heartGain, 0), agentIdx)
+            agent.setCoins(agent.coins + nextTileType.type.coinGain, agentIdx)
             nextTileType.type.enabled = false
           } else if (nextTileType.type.type === 'HOLOGRAM') {
-            agent.setHearts(0, currentAgentIdx)
-            agent.setPositionY(-1.4, currentAgentIdx)
+            agent.setHearts(0, agentIdx)
+            agent.setPositionY(-1.4, agentIdx)
+          } else if (nextTileType.type.type === 'GUM' || nextTileType.type.type === 'PLUM') {
+            agent.setCoins(agent.coins + nextTileType.type.coinGain, agent.index)
+            nextTileType.type = DefaultTile
           }
 
           movementApi.start((i) => {
-            if (i === currentAgentIdx) {
+            if (i === agentIdx) {
               return {
                 positionX,
                 rotation,
@@ -179,16 +180,13 @@ export default function Tiles() {
             }
             return {}
           })
-          agent.setRotation(rotation, currentAgentIdx)
-          agent.setPositionX(positionX, currentAgentIdx)
+          agent.setRotation(rotation, agentIdx)
+          agent.setPositionX(positionX, agentIdx)
         }
         break
 
       case 'up':
-        nextTileType =
-          environment.agentEnvironment[currentAgentIdx].tileMap[
-            agent.position.x + Math.sqrt(TILE_COUNT) * (agent.position.y - 1)
-          ]
+        nextTileType = agent.tileMap[agent.position.x + Math.sqrt(TILE_COUNT) * (agent.position.y - 1)]
 
         if (agent.position.y - 1 >= 0 && nextTileType.type.type !== 'HOLE') {
           agent.position.y -= 1
@@ -196,16 +194,19 @@ export default function Tiles() {
           rotation = Math.PI
 
           if (nextTileType.type.type === 'BOMB' && nextTileType.type.enabled) {
-            agent.setHearts(Math.max(agent.hearts - 2, 0), currentAgentIdx)
-            agent.setCoins(agent.coins - 3, currentAgentIdx)
+            agent.setHearts(Math.max(agent.hearts + nextTileType.type.heartGain, 0), agentIdx)
+            agent.setCoins(agent.coins + nextTileType.type.coinGain, agentIdx)
             nextTileType.type.enabled = false
           } else if (nextTileType.type.type === 'HOLOGRAM') {
-            agent.setHearts(0, currentAgentIdx)
-            agent.setPositionY(-1.4, currentAgentIdx)
+            agent.setHearts(0, agentIdx)
+            agent.setPositionY(-1.4, agentIdx)
+          } else if (nextTileType.type.type === 'GUM' || nextTileType.type.type === 'PLUM') {
+            agent.setCoins(agent.coins + nextTileType.type.coinGain, agent.index)
+            nextTileType.type = DefaultTile
           }
 
           movementApi.start((i) => {
-            if (i === currentAgentIdx) {
+            if (i === agentIdx) {
               return {
                 positionZ,
                 rotation,
@@ -213,16 +214,13 @@ export default function Tiles() {
             }
             return {}
           })
-          agent.setRotation(rotation, currentAgentIdx)
-          agent.setPositionZ(positionZ, currentAgentIdx)
+          agent.setRotation(rotation, agentIdx)
+          agent.setPositionZ(positionZ, agentIdx)
         }
         break
 
       case 'down':
-        nextTileType =
-          environment.agentEnvironment[currentAgentIdx].tileMap[
-            agent.position.x + Math.sqrt(TILE_COUNT) * (agent.position.y + 1)
-          ]
+        nextTileType = agent.tileMap[agent.position.x + Math.sqrt(TILE_COUNT) * (agent.position.y + 1)]
 
         if (agent.position.y + 1 <= Math.sqrt(TILE_COUNT) - 1 && nextTileType.type.type !== 'HOLE') {
           agent.position.y += 1
@@ -230,16 +228,19 @@ export default function Tiles() {
           rotation = 0
 
           if (nextTileType.type.type === 'BOMB' && nextTileType.type.enabled) {
-            agent.setHearts(Math.max(agent.hearts - 2, 0), currentAgentIdx)
-            agent.setCoins(agent.coins - 3, currentAgentIdx)
+            agent.setHearts(Math.max(agent.hearts + nextTileType.type.heartGain, 0), agentIdx)
+            agent.setCoins(agent.coins + nextTileType.type.coinGain, agentIdx)
             nextTileType.type.enabled = false
           } else if (nextTileType.type.type === 'HOLOGRAM') {
-            agent.setHearts(0, currentAgentIdx)
-            agent.setPositionY(-1.4, currentAgentIdx)
+            agent.setHearts(0, agentIdx)
+            agent.setPositionY(-1.4, agentIdx)
+          } else if (nextTileType.type.type === 'GUM' || nextTileType.type.type === 'PLUM') {
+            agent.setCoins(agent.coins + nextTileType.type.coinGain, agent.index)
+            nextTileType.type = DefaultTile
           }
 
           movementApi.start((i) => {
-            if (i === currentAgentIdx) {
+            if (i === agentIdx) {
               return {
                 positionZ,
                 rotation,
@@ -247,8 +248,8 @@ export default function Tiles() {
             }
             return {}
           })
-          agent.setRotation(rotation, currentAgentIdx)
-          agent.setPositionZ(positionZ, currentAgentIdx)
+          agent.setRotation(rotation, agentIdx)
+          agent.setPositionZ(positionZ, agentIdx)
         }
         break
     }
