@@ -4,7 +4,6 @@ import { forwardRef, useState } from 'react'
 import Bunny from './Models/Bunny'
 import Heart from './Models/Heart'
 import useEnvironment from './store/useEnvironment'
-import { env } from 'process'
 
 export const Player = forwardRef<any, any>((props, ref) => {
   const [hovered, setHovered] = useState(false)
@@ -13,19 +12,19 @@ export const Player = forwardRef<any, any>((props, ref) => {
 
   const { scale, rotation, positionY } = useSpring<{ scale: number; rotation: number; positionY: number }>({
     scale: hovered ? 1.2 : 1,
-    rotation: hovered ? Math.PI * 2 : 0,
+    rotation: 0,
     positionY: hovered ? 0.3 : 0,
-    from: { scale: 0 },
+    from: { scale: 0, rotation: Math.PI * 2 },
     config: config.gentle,
   })
 
   const environment = useEnvironment()
 
   return (
-    <group ref={ref} {...props}>
+    <animated.group ref={ref} {...props}>
       <animated.group position-y={positionY} scale={scale}>
         {[...Array(environment.agentEnvironment[environment.currentAgentIdx].hearts)].map((_, i) => (
-          <Heart position-y={0.8} position-x={-0.4 + 0.4 * i} />
+          <Heart key={i} position-y={0.8} position-x={-0.4 + 0.4 * i} />
         ))}
       </animated.group>
       <animated.group
@@ -43,6 +42,6 @@ export const Player = forwardRef<any, any>((props, ref) => {
       >
         <Bunny />
       </animated.group>
-    </group>
+    </animated.group>
   )
 })
