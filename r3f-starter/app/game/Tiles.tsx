@@ -13,6 +13,9 @@ import Plum from './Models/Plum'
 import { Perf } from 'r3f-perf'
 import useEnvironment from './store/useEnvironment'
 import { Position, TileType, BombTile, DefaultTile, PlumTile, GumTile, HologramTile, HoleTile } from '@/index.d'
+import { button, useControls } from 'leva'
+import { ArrowDown, ArrowLeft, ArrowRight, ArrowUp } from 'lucide-react'
+import { Button } from '@/components/ui/button'
 
 export default function Tiles() {
   const AnimatedGrid = animated(Grid)
@@ -47,7 +50,11 @@ export default function Tiles() {
   const agentTiles = useMemo(() => {
     const randTiles = []
     for (let i = 0; i < NUM_AGENTS; i++) {
-      randTiles.push(Math.round(Math.random() * TILE_COUNT - 1))
+      let rand = Math.round(Math.random() * TILE_COUNT - 1)
+      while (randTiles.includes(rand)) {
+        rand = Math.round(Math.random() * TILE_COUNT - 1)
+      }
+      randTiles.push(rand)
     }
     return randTiles
   }, [])
@@ -99,6 +106,14 @@ export default function Tiles() {
   //   }, 5000)
   // }, [])
 
+  const [movement, movementApi] = useSprings(NUM_AGENTS, (i) => ({
+    positionX: environment.agentEnvironment[i].positionX,
+    positionZ: environment.agentEnvironment[i].positionZ,
+    positionY: 0.5,
+    rotation: environment.agentEnvironment[i].rotation,
+    config: config.gentle,
+  }))
+
   return (
     <>
       {/* <Perf /> */}
@@ -123,11 +138,17 @@ export default function Tiles() {
                   {agentTiles.includes(i) ? (
                     agentTiles[environment.currentAgentIdx] === i ? (
                       <>
-                        <Player position-y={0.5} ref={player} />
+                        <Player
+                          rotation-y={movement[environment.currentAgentIdx].rotation}
+                          position-x={movement[environment.currentAgentIdx].positionX}
+                          position-z={movement[environment.currentAgentIdx].positionZ}
+                          position-y={0.5}
+                          ref={player}
+                        />
                         {/* <RadarField /> */}
                       </>
                     ) : (
-                      <Clone i={i} position-y={0.5} />
+                      <Clone movement={movement} i={i} position-y={0.5} />
                     )
                   ) : null}
                   <RoundedBox castShadow receiveShadow args={[1, tile === 'BOMB' ? 2.1 : 0.1, 1]}>
@@ -162,6 +183,103 @@ export default function Tiles() {
         fadeStrength={1}
         infiniteGrid
       />
+      <Html>
+        <Button
+          onClick={() => {
+            const currentAgentIdx = environment.currentAgentIdx
+            const positionX = environment.agentEnvironment[currentAgentIdx].positionX - 1.1
+            const rotation = -Math.PI * 0.5
+            movementApi.start((i) => {
+              if (i === currentAgentIdx) {
+                return {
+                  positionX,
+                  rotation,
+                  positionY: 0.5,
+                }
+              }
+              return {}
+            })
+            environment.agentEnvironment[currentAgentIdx].setRotation(rotation, currentAgentIdx)
+            environment.agentEnvironment[currentAgentIdx].setPositionX(positionX, currentAgentIdx)
+          }}
+          variant='none'
+          className='z-10 absolute right-1/2 bottom-10 transform -translate-y-1/2'
+        >
+          <ArrowLeft className='w-10 h-10' />
+        </Button>
+
+        <Button
+          onClick={() => {
+            const currentAgentIdx = environment.currentAgentIdx
+            const positionX = environment.agentEnvironment[currentAgentIdx].positionX + 1.1
+            const rotation = Math.PI * 0.5
+            movementApi.start((i) => {
+              if (i === currentAgentIdx) {
+                return {
+                  positionX,
+                  rotation,
+                  positionY: 0.5,
+                }
+              }
+              return {}
+            })
+            environment.agentEnvironment[currentAgentIdx].setRotation(rotation, currentAgentIdx)
+            environment.agentEnvironment[currentAgentIdx].setPositionX(positionX, currentAgentIdx)
+          }}
+          variant='none'
+          className='z-10 absolute left-1/2 bottom-10 transform -translate-y-1/2'
+        >
+          <ArrowRight className='w-10 h-10' />
+        </Button>
+
+        <Button
+          onClick={() => {
+            const currentAgentIdx = environment.currentAgentIdx
+            const positionZ = environment.agentEnvironment[currentAgentIdx].positionZ - 1.1
+            const rotation = Math.PI
+            movementApi.start((i) => {
+              if (i === currentAgentIdx) {
+                return {
+                  positionZ,
+                  rotation,
+                  positionY: 0.5,
+                }
+              }
+              return {}
+            })
+            environment.agentEnvironment[currentAgentIdx].setRotation(rotation, currentAgentIdx)
+            environment.agentEnvironment[currentAgentIdx].setPositionZ(positionZ, currentAgentIdx)
+          }}
+          variant='none'
+          className='z-10 absolute left-1/2 bottom-24 transform -translate-x-1/2'
+        >
+          <ArrowUp className='w-10 h-10' />
+        </Button>
+
+        <Button
+          onClick={() => {
+            const currentAgentIdx = environment.currentAgentIdx
+            const positionZ = environment.agentEnvironment[currentAgentIdx].positionZ + 1.1
+            const rotation = 0
+            movementApi.start((i) => {
+              if (i === currentAgentIdx) {
+                return {
+                  positionZ,
+                  rotation,
+                  positionY: 0.5,
+                }
+              }
+              return {}
+            })
+            environment.agentEnvironment[currentAgentIdx].setRotation(rotation, currentAgentIdx)
+            environment.agentEnvironment[currentAgentIdx].setPositionZ(positionZ, currentAgentIdx)
+          }}
+          variant='none'
+          className='z-10 absolute left-1/2 bottom-6 transform -translate-x-1/2'
+        >
+          <ArrowDown className='w-10 h-10' />
+        </Button>
+      </Html>
     </>
   )
 }
