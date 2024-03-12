@@ -378,7 +378,6 @@ export default function Tiles() {
         >
           <ArrowDown className='w-10 h-10' />
         </Button>
-        {/* <Button onClick={move}>begin</Button> */}
       </Html>
     </>
   )

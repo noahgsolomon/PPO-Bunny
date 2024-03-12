@@ -111,7 +111,7 @@ export default function Page() {
         </Avatar>
         <div className='flex flex-col gap-2'>
           <div className='flex flex-row gap-2 items-center'>
-            <Image src={'/coin.webp'} alt='coin' width={24} height={24} />{' '}
+            <Image unoptimized src={'/coin.webp'} alt='coin' width={24} height={24} />{' '}
             <span className='text-yellow-500 font-bold text-2xl'>
               {environment.agentEnvironment[environment.currentAgentIdx].coins}
             </span>
