@@ -11,7 +11,17 @@ import HologramMaterial from './HologramMaterial'
 import Gum from './Models/Gum'
 import Plum from './Models/Plum'
 import useEnvironment from './store/useEnvironment'
-import { Position, TileType, BombTile, DefaultTile, PlumTile, GumTile, HologramTile, HoleTile } from '@/index.d'
+import {
+  Position,
+  TileType,
+  BombTile,
+  DefaultTile,
+  PlumTile,
+  GumTile,
+  HologramTile,
+  HoleTile,
+  AgentObservation,
+} from '@/index.d'
 import { ArrowDown, ArrowLeft, ArrowRight, ArrowUp } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Perf } from 'r3f-perf'
@@ -20,6 +30,10 @@ export default function Tiles() {
   const AnimatedGrid = animated(Grid)
   const TILE_COUNT = 100
   const NUM_AGENTS = 5
+  const N_STEPS = 6
+  const TOTAL_STEPS = 20
+  const TOTAL_HEARTS = 3
+  const VISION_LENGTH = 2
 
   const [springs, _] = useSprings(TILE_COUNT, (i) => {
     const row = Math.floor(i / Math.sqrt(TILE_COUNT))
@@ -101,12 +115,18 @@ export default function Tiles() {
     }
   }, [])
 
+  const [observations, setObservations] = useState<AgentObservation[]>([])
+
   const [movement, movementApi] = useSprings(NUM_AGENTS, (i) => ({
     positionX: environment.agentEnvironment[i].positionX,
     positionZ: environment.agentEnvironment[i].positionZ,
     rotation: environment.agentEnvironment[i].rotation,
     config: config.gentle,
   }))
+
+  useEffect(() => {
+    console.log(observations)
+  }, [observations])
 
   const move = (direction: 'left' | 'right' | 'up' | 'down') => {
     const currentAgentIdx = environment.currentAgentIdx
@@ -118,6 +138,22 @@ export default function Tiles() {
 
     if (agent.steps === 0) return
 
+    let observation = observations.filter((obs) => obs.agentIdx === agentIdx && obs.rewards.length < N_STEPS)
+
+    let newObservation: AgentObservation = {
+      agentIdx,
+      state: { tileState: [], normalizedHeartsRemaining: 1, normalizedStepsRemaining: 1 },
+      action: { index: 0, name: 'left' },
+      actionOldProbability: 0,
+      actionNewProbability: 0,
+      rewards: [],
+      valueOutput: 0,
+      startStepTrajectoryNum: -1 * (agent.steps - TOTAL_STEPS),
+    }
+
+    let coinGain = 0
+    let heartGain = 0
+
     switch (direction) {
       case 'left':
         nextTileType = agent.tileMap[agent.position.x - 1 + Math.sqrt(TILE_COUNT) * agent.position.y]
@@ -126,22 +162,31 @@ export default function Tiles() {
           agent.position.x -= 1
           positionX = agent.positionX - 1.1
           rotation = -Math.PI * 0.5
-
           if (nextTileType.type.type === 'BOMB' && nextTileType.type.enabled) {
             agent.setHearts(Math.max(agent.hearts + nextTileType.type.heartGain, 0), agentIdx)
             agent.setCoins(agent.coins + nextTileType.type.coinGain, agentIdx)
             nextTileType.type.enabled = false
             agent.setSteps(agent.steps - 1, agentIdx)
+            heartGain = nextTileType.type.heartGain
+            coinGain = nextTileType.type.coinGain
           } else if (nextTileType.type.type === 'HOLOGRAM') {
             agent.setHearts(0, agentIdx)
             agent.setSteps(0, agentIdx)
             agent.setPositionY(-1.4, agentIdx)
+            heartGain = nextTileType.type.heartGain
+            coinGain = nextTileType.type.coinGain
           } else if (nextTileType.type.type === 'GUM' || nextTileType.type.type === 'PLUM') {
             agent.setSteps(agent.steps - 1, agentIdx)
             agent.setCoins(agent.coins + nextTileType.type.coinGain, agent.index)
+
+            heartGain = nextTileType.type.heartGain
+            coinGain = nextTileType.type.coinGain
+
             nextTileType.type = DefaultTile
           } else {
             agent.setSteps(agent.steps - 1, agentIdx)
+            heartGain = nextTileType.type.heartGain
+            coinGain = nextTileType.type.coinGain
           }
 
           movementApi.start((i) => {
@@ -155,6 +200,63 @@ export default function Tiles() {
           })
           agent.setRotation(rotation, agentIdx)
           agent.setPositionX(positionX, agentIdx)
+
+          newObservation.action.index = 0
+          newObservation.action.name = 'left'
+
+          const agentPosition = agent.position
+
+          const nearTiles = []
+
+          for (let y = -VISION_LENGTH; y <= VISION_LENGTH; y++) {
+            for (let x = -VISION_LENGTH; x <= VISION_LENGTH; x++) {
+              if (x === 0 && y === 0) continue
+
+              const tileX = agentPosition.x + x
+              const tileY = agentPosition.y + y
+
+              if (tileX < 0 || tileX >= Math.sqrt(TILE_COUNT) || tileY < 0 || tileY >= Math.sqrt(TILE_COUNT)) {
+                nearTiles.push({
+                  type: {
+                    type: 'DEFAULT',
+                    heartGain: 0,
+                    coinGain: 0,
+                    stepGain: 0,
+                  },
+                  position: {
+                    x: tileX,
+                    y: tileY,
+                  },
+                })
+              } else {
+                const tile = agent.tileMap[tileX + Math.sqrt(TILE_COUNT) * tileY]
+                nearTiles.push(tile)
+              }
+            }
+          }
+
+          newObservation.state.tileState = nearTiles.map((tile) => {
+            const xDiff = tile.position.x - agentPosition.x
+            const yDiff = tile.position.y - agentPosition.y
+            const distance = Math.max(Math.abs(xDiff), Math.abs(yDiff))
+            const significanceFactor = VISION_LENGTH / (VISION_LENGTH - 1 + distance)
+
+            return {
+              heartGain: tile.type.heartGain * significanceFactor,
+              coinGain: tile.type.coinGain * significanceFactor,
+              stepGain: tile.type.stepGain * significanceFactor,
+              dirX: xDiff === 0 ? 0 : xDiff > 0 ? 1 : -1,
+              dirY: yDiff === 0 ? 0 : yDiff > 0 ? 1 : -1,
+            }
+          })
+
+          newObservation.state.normalizedStepsRemaining = agent.steps / TOTAL_STEPS
+          newObservation.state.normalizedHeartsRemaining = agent.hearts / TOTAL_HEARTS
+
+          observation.map((observation) => observation.rewards.push((heartGain / TOTAL_HEARTS) * 0.2 + coinGain * 0.8))
+
+          observation.push(newObservation)
+          setObservations((observations) => [...observations, newObservation])
         }
         break
 
@@ -165,22 +267,31 @@ export default function Tiles() {
           agent.position.x += 1
           positionX = agent.positionX + 1.1
           rotation = Math.PI * 0.5
-
           if (nextTileType.type.type === 'BOMB' && nextTileType.type.enabled) {
             agent.setHearts(Math.max(agent.hearts + nextTileType.type.heartGain, 0), agentIdx)
             agent.setCoins(agent.coins + nextTileType.type.coinGain, agentIdx)
             nextTileType.type.enabled = false
             agent.setSteps(agent.steps - 1, agentIdx)
+            heartGain = nextTileType.type.heartGain
+            coinGain = nextTileType.type.coinGain
           } else if (nextTileType.type.type === 'HOLOGRAM') {
             agent.setHearts(0, agentIdx)
             agent.setSteps(0, agentIdx)
             agent.setPositionY(-1.4, agentIdx)
+            heartGain = nextTileType.type.heartGain
+            coinGain = nextTileType.type.coinGain
           } else if (nextTileType.type.type === 'GUM' || nextTileType.type.type === 'PLUM') {
             agent.setSteps(agent.steps - 1, agentIdx)
             agent.setCoins(agent.coins + nextTileType.type.coinGain, agent.index)
+
+            heartGain = nextTileType.type.heartGain
+            coinGain = nextTileType.type.coinGain
+
             nextTileType.type = DefaultTile
           } else {
             agent.setSteps(agent.steps - 1, agentIdx)
+            heartGain = nextTileType.type.heartGain
+            coinGain = nextTileType.type.coinGain
           }
 
           movementApi.start((i) => {
@@ -194,6 +305,63 @@ export default function Tiles() {
           })
           agent.setRotation(rotation, agentIdx)
           agent.setPositionX(positionX, agentIdx)
+
+          newObservation.action.index = 1
+          newObservation.action.name = 'right'
+
+          const agentPosition = agent.position
+
+          const nearTiles = []
+
+          for (let y = -VISION_LENGTH; y <= VISION_LENGTH; y++) {
+            for (let x = -VISION_LENGTH; x <= VISION_LENGTH; x++) {
+              if (x === 0 && y === 0) continue
+
+              const tileX = agentPosition.x + x
+              const tileY = agentPosition.y + y
+
+              if (tileX < 0 || tileX >= Math.sqrt(TILE_COUNT) || tileY < 0 || tileY >= Math.sqrt(TILE_COUNT)) {
+                nearTiles.push({
+                  type: {
+                    type: 'DEFAULT',
+                    heartGain: 0,
+                    coinGain: 0,
+                    stepGain: 0,
+                  },
+                  position: {
+                    x: tileX,
+                    y: tileY,
+                  },
+                })
+              } else {
+                const tile = agent.tileMap[tileX + Math.sqrt(TILE_COUNT) * tileY]
+                nearTiles.push(tile)
+              }
+            }
+          }
+
+          newObservation.state.tileState = nearTiles.map((tile) => {
+            const xDiff = tile.position.x - agentPosition.x
+            const yDiff = tile.position.y - agentPosition.y
+            const distance = Math.max(Math.abs(xDiff), Math.abs(yDiff))
+            const significanceFactor = VISION_LENGTH / (VISION_LENGTH - 1 + distance)
+
+            return {
+              heartGain: tile.type.heartGain * significanceFactor,
+              coinGain: tile.type.coinGain * significanceFactor,
+              stepGain: tile.type.stepGain * significanceFactor,
+              dirX: xDiff === 0 ? 0 : xDiff > 0 ? 1 : -1,
+              dirY: yDiff === 0 ? 0 : yDiff > 0 ? 1 : -1,
+            }
+          })
+
+          newObservation.state.normalizedStepsRemaining = agent.steps / TOTAL_STEPS
+          newObservation.state.normalizedHeartsRemaining = agent.hearts / TOTAL_HEARTS
+
+          observation.map((observation) => observation.rewards.push((heartGain / TOTAL_HEARTS) * 0.2 + coinGain * 0.8))
+
+          observation.push(newObservation)
+          setObservations((observations) => [...observations, newObservation])
         }
         break
 
@@ -210,16 +378,26 @@ export default function Tiles() {
             agent.setCoins(agent.coins + nextTileType.type.coinGain, agentIdx)
             nextTileType.type.enabled = false
             agent.setSteps(agent.steps - 1, agentIdx)
+            heartGain = nextTileType.type.heartGain
+            coinGain = nextTileType.type.coinGain
           } else if (nextTileType.type.type === 'HOLOGRAM') {
             agent.setHearts(0, agentIdx)
             agent.setSteps(0, agentIdx)
             agent.setPositionY(-1.4, agentIdx)
+            heartGain = nextTileType.type.heartGain
+            coinGain = nextTileType.type.coinGain
           } else if (nextTileType.type.type === 'GUM' || nextTileType.type.type === 'PLUM') {
             agent.setSteps(agent.steps - 1, agentIdx)
             agent.setCoins(agent.coins + nextTileType.type.coinGain, agent.index)
+
+            heartGain = nextTileType.type.heartGain
+            coinGain = nextTileType.type.coinGain
+
             nextTileType.type = DefaultTile
           } else {
             agent.setSteps(agent.steps - 1, agentIdx)
+            heartGain = nextTileType.type.heartGain
+            coinGain = nextTileType.type.coinGain
           }
 
           movementApi.start((i) => {
@@ -233,6 +411,63 @@ export default function Tiles() {
           })
           agent.setRotation(rotation, agentIdx)
           agent.setPositionZ(positionZ, agentIdx)
+
+          newObservation.action.index = 2
+          newObservation.action.name = 'up'
+
+          const agentPosition = agent.position
+
+          const nearTiles = []
+
+          for (let y = -VISION_LENGTH; y <= VISION_LENGTH; y++) {
+            for (let x = -VISION_LENGTH; x <= VISION_LENGTH; x++) {
+              if (x === 0 && y === 0) continue
+
+              const tileX = agentPosition.x + x
+              const tileY = agentPosition.y + y
+
+              if (tileX < 0 || tileX >= Math.sqrt(TILE_COUNT) || tileY < 0 || tileY >= Math.sqrt(TILE_COUNT)) {
+                nearTiles.push({
+                  type: {
+                    type: 'DEFAULT',
+                    heartGain: 0,
+                    coinGain: 0,
+                    stepGain: 0,
+                  },
+                  position: {
+                    x: tileX,
+                    y: tileY,
+                  },
+                })
+              } else {
+                const tile = agent.tileMap[tileX + Math.sqrt(TILE_COUNT) * tileY]
+                nearTiles.push(tile)
+              }
+            }
+          }
+
+          newObservation.state.tileState = nearTiles.map((tile) => {
+            const xDiff = tile.position.x - agentPosition.x
+            const yDiff = tile.position.y - agentPosition.y
+            const distance = Math.max(Math.abs(xDiff), Math.abs(yDiff))
+            const significanceFactor = VISION_LENGTH / (VISION_LENGTH - 1 + distance)
+
+            return {
+              heartGain: tile.type.heartGain * significanceFactor,
+              coinGain: tile.type.coinGain * significanceFactor,
+              stepGain: tile.type.stepGain * significanceFactor,
+              dirX: xDiff === 0 ? 0 : xDiff > 0 ? 1 : -1,
+              dirY: yDiff === 0 ? 0 : yDiff > 0 ? 1 : -1,
+            }
+          })
+
+          newObservation.state.normalizedStepsRemaining = agent.steps / TOTAL_STEPS
+          newObservation.state.normalizedHeartsRemaining = agent.hearts / TOTAL_HEARTS
+
+          observation.map((observation) => observation.rewards.push((heartGain / TOTAL_HEARTS) * 0.2 + coinGain * 0.8))
+
+          observation.push(newObservation)
+          setObservations((observations) => [...observations, newObservation])
         }
         break
 
@@ -249,16 +484,26 @@ export default function Tiles() {
             agent.setCoins(agent.coins + nextTileType.type.coinGain, agentIdx)
             nextTileType.type.enabled = false
             agent.setSteps(agent.steps - 1, agentIdx)
+            heartGain = nextTileType.type.heartGain
+            coinGain = nextTileType.type.coinGain
           } else if (nextTileType.type.type === 'HOLOGRAM') {
             agent.setHearts(0, agentIdx)
             agent.setSteps(0, agentIdx)
             agent.setPositionY(-1.4, agentIdx)
+            heartGain = nextTileType.type.heartGain
+            coinGain = nextTileType.type.coinGain
           } else if (nextTileType.type.type === 'GUM' || nextTileType.type.type === 'PLUM') {
             agent.setSteps(agent.steps - 1, agentIdx)
             agent.setCoins(agent.coins + nextTileType.type.coinGain, agent.index)
+
+            heartGain = nextTileType.type.heartGain
+            coinGain = nextTileType.type.coinGain
+
             nextTileType.type = DefaultTile
           } else {
             agent.setSteps(agent.steps - 1, agentIdx)
+            heartGain = nextTileType.type.heartGain
+            coinGain = nextTileType.type.coinGain
           }
 
           movementApi.start((i) => {
@@ -272,6 +517,63 @@ export default function Tiles() {
           })
           agent.setRotation(rotation, agentIdx)
           agent.setPositionZ(positionZ, agentIdx)
+
+          newObservation.action.index = 3
+          newObservation.action.name = 'down'
+
+          const agentPosition = agent.position
+
+          const nearTiles = []
+
+          for (let y = -VISION_LENGTH; y <= VISION_LENGTH; y++) {
+            for (let x = -VISION_LENGTH; x <= VISION_LENGTH; x++) {
+              if (x === 0 && y === 0) continue
+
+              const tileX = agentPosition.x + x
+              const tileY = agentPosition.y + y
+
+              if (tileX < 0 || tileX >= Math.sqrt(TILE_COUNT) || tileY < 0 || tileY >= Math.sqrt(TILE_COUNT)) {
+                nearTiles.push({
+                  type: {
+                    type: 'DEFAULT',
+                    heartGain: 0,
+                    coinGain: 0,
+                    stepGain: 0,
+                  },
+                  position: {
+                    x: tileX,
+                    y: tileY,
+                  },
+                })
+              } else {
+                const tile = agent.tileMap[tileX + Math.sqrt(TILE_COUNT) * tileY]
+                nearTiles.push(tile)
+              }
+            }
+          }
+
+          newObservation.state.tileState = nearTiles.map((tile) => {
+            const xDiff = tile.position.x - agentPosition.x
+            const yDiff = tile.position.y - agentPosition.y
+            const distance = Math.max(Math.abs(xDiff), Math.abs(yDiff))
+            const significanceFactor = VISION_LENGTH / (VISION_LENGTH - 1 + distance)
+
+            return {
+              heartGain: tile.type.heartGain * significanceFactor,
+              coinGain: tile.type.coinGain * significanceFactor,
+              stepGain: tile.type.stepGain * significanceFactor,
+              dirX: xDiff === 0 ? 0 : xDiff > 0 ? 1 : -1,
+              dirY: yDiff === 0 ? 0 : yDiff > 0 ? 1 : -1,
+            }
+          })
+
+          newObservation.state.normalizedStepsRemaining = agent.steps / TOTAL_STEPS
+          newObservation.state.normalizedHeartsRemaining = agent.hearts / TOTAL_HEARTS
+
+          observation.map((observation) => observation.rewards.push((heartGain / TOTAL_HEARTS) * 0.2 + coinGain * 0.8))
+
+          observation.push(newObservation)
+          setObservations((observations) => [...observations, newObservation])
         }
         break
     }
