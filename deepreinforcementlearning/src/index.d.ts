@@ -70,16 +70,10 @@ export type AgentObservation = {
   action: Action
   actionOldProbability: number
   actionNewProbability: number
-  rewards: number[]
+  reward: number
+  complete: boolean
   valueOutput: number
   startStepTrajectoryNum: number
-}
-
-export type ObservationState = {
-  agentObservation: AgentObservation[]
-  setAgentObservation: (agentObservation: AgentObservation, i: number) => void
-  discountFactor: number
-  visionLength: number
 }
 
 export type GameState = {
