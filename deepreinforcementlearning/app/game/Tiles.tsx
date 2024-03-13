@@ -1,7 +1,7 @@
 'use client'
 
 import { animated, config, useSpring, useSprings } from '@react-spring/three'
-import { Center, Grid, Html, RoundedBox } from '@react-three/drei'
+import { Center, Grid, Html, RoundedBox, Text3D } from '@react-three/drei'
 import { Player } from './Player'
 import { Fragment, useEffect, useMemo, useRef, useState } from 'react'
 import { Group } from 'three'
@@ -25,6 +25,7 @@ import {
 import { ArrowDown, ArrowLeft, ArrowRight, ArrowUp } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Perf } from 'r3f-perf'
+import { GlassBucket } from './Models/GlassBucket'
 
 export default function Tiles() {
   const AnimatedGrid = animated(Grid)
@@ -35,6 +36,7 @@ export default function Tiles() {
   const TOTAL_HEARTS = 3
   const VISION_LENGTH = 2
   const DISCOUNT_FACTOR = 0.9
+  const OBSERVATION_RESERVOIR = 200
 
   const [springs, _] = useSprings(TILE_COUNT, (i) => {
     const row = Math.floor(i / Math.sqrt(TILE_COUNT))
@@ -73,9 +75,7 @@ export default function Tiles() {
     return randTiles
   }, [])
 
-  useEffect(() => {
-    // const tileMaps = []
-    // for (let i = 0; i < NUM_AGENTS; i++) {
+  const generateTileMap = () => {
     const newTileMap = springs.reduce(
       (acc, _, i) => {
         const { tile } = generateTiles(i, agentTiles)
@@ -98,8 +98,11 @@ export default function Tiles() {
       },
       [] as { type: TileType; position: Position }[],
     )
-    // tileMaps.push(newTileMap)
-    // }
+    return newTileMap
+  }
+
+  useEffect(() => {
+    const newTileMap = generateTileMap()
 
     environment.setCurrentAgentIdx(0)
     for (let i = 0; i < NUM_AGENTS; i++) {
@@ -125,14 +128,24 @@ export default function Tiles() {
     config: config.gentle,
   }))
 
-  useEffect(() => {
-    console.log(observations)
-  }, [observations])
+  const resetAgentMetrics = () => {
+    for (let i = 0; i < NUM_AGENTS; i++) {
+      environment.agentEnvironment[i].setSteps(TOTAL_STEPS, i)
+      environment.agentEnvironment[i].setHearts(TOTAL_HEARTS, i)
+      environment.agentEnvironment[i].setCoins(0, i)
+      environment.agentEnvironment[i].setPositionY(0.5, i)
+      environment.agentEnvironment[i].setPosition(
+        {
+          x: agentTiles[i] % Math.sqrt(TILE_COUNT),
+          y: Math.floor(agentTiles[i] / Math.sqrt(TILE_COUNT)),
+        },
+        i,
+      )
+    }
+  }
 
-  const move = (direction: 'left' | 'right' | 'up' | 'down') => {
-    const currentAgentIdx = environment.currentAgentIdx
-    const agent = environment.agentEnvironment[currentAgentIdx]
-    const agentIdx = agent.index
+  const move = (direction: 'left' | 'right' | 'up' | 'down', agentIdx: number) => {
+    const agent = environment.agentEnvironment[agentIdx]
     const TILE_COUNT = environment.TILE_COUNT
 
     let nextTileType, positionX, positionZ, rotation
@@ -613,6 +626,38 @@ export default function Tiles() {
     }
   }
 
+  useEffect(() => {
+    console.log(environment.agentEnvironment[environment.currentAgentIdx])
+
+    const moveAgents = () => {
+      const directions: ('left' | 'right' | 'up' | 'down')[] = ['left', 'right', 'up', 'down']
+
+      let numFinished = 0
+
+      for (let i = 0; i < NUM_AGENTS; i++) {
+        if (environment.agentEnvironment[i].steps <= 0 || environment.agentEnvironment[i].hearts <= 0) {
+          numFinished += 1
+        }
+        const randomDirection = directions[Math.floor(Math.random() * directions.length)]
+        move(randomDirection, i)
+      }
+
+      if (numFinished > NUM_AGENTS / 2) {
+        const newTileMap = generateTileMap()
+        for (let i = 0; i < NUM_AGENTS; i++) {
+          const clonedTileMap = structuredClone(newTileMap)
+          environment.agentEnvironment[i].setTileMap(clonedTileMap, i)
+        }
+        resetAgentMetrics()
+      }
+    }
+
+    const intervalId = setInterval(moveAgents, 1000)
+
+    return () => {
+      clearInterval(intervalId)
+    }
+  }, [environment.agentEnvironment])
   return (
     <>
       <Perf />
@@ -669,6 +714,19 @@ export default function Tiles() {
           <meshStandardMaterial color={'#212336'} />
         </RoundedBox>
       </animated.mesh>
+      <group position-x={7.5} position-z={-7.5} position-y={-1.5}>
+        <Text3D position-y={5} position-x={-0.35} size={0.4} font={'/roboto.json'}>
+          {Math.round((observations.length / OBSERVATION_RESERVOIR) * 100)}%
+        </Text3D>
+        <Text3D position-y={4.25} position-x={-0.8} size={0.4} font={'/roboto.json'}>
+          {observations.length}/{OBSERVATION_RESERVOIR}
+        </Text3D>
+        <mesh position={[0, (observations.length / OBSERVATION_RESERVOIR) * 0.7 + 0.01, 0]}>
+          <cylinderGeometry args={[1.2, 1.2, (observations.length / OBSERVATION_RESERVOIR) * 4]} />
+          <meshStandardMaterial transparent color={'green'} />
+        </mesh>
+        <GlassBucket scale={4} />
+      </group>
       <AnimatedGrid
         position-y={baseSpring.positionY}
         args={[10.5, 10.5]}
@@ -684,7 +742,7 @@ export default function Tiles() {
       />
       <Html scale={0.5} position-z={8}>
         <Button
-          onClick={() => move('left')}
+          onClick={() => move('left', 1)}
           variant='none'
           className='z-10 absolute right-1/2 bottom-10 transform -translate-y-1/2'
         >
@@ -692,7 +750,7 @@ export default function Tiles() {
         </Button>
 
         <Button
-          onClick={() => move('right')}
+          onClick={() => move('right', 1)}
           variant='none'
           className='z-10 absolute left-1/2 bottom-10 transform -translate-y-1/2'
         >
@@ -700,7 +758,7 @@ export default function Tiles() {
         </Button>
 
         <Button
-          onClick={() => move('up')}
+          onClick={() => move('up', 1)}
           variant='none'
           className='z-10 absolute left-1/2 bottom-24 transform -translate-x-1/2'
         >
@@ -708,7 +766,7 @@ export default function Tiles() {
         </Button>
 
         <Button
-          onClick={() => move('down')}
+          onClick={() => move('down', 1)}
           variant='none'
           className='z-10 absolute left-1/2 bottom-6 transform -translate-x-1/2'
         >
