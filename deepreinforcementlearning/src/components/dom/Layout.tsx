@@ -10,13 +10,11 @@ const Layout = ({ children }) => {
   return (
     <div
       ref={ref}
-      className='dark bg-background text-foreground overflow-x-hidden'
+      className='dark bg-background text-foreground overflow-hidden'
       style={{
         position: 'relative',
         width: ' 100%',
         height: '100%',
-        overflow: 'auto',
-        touchAction: 'auto',
       }}
     >
       {children}
