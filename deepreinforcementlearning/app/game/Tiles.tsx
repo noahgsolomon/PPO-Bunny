@@ -34,6 +34,7 @@ export default function Tiles() {
   const TOTAL_STEPS = 20
   const TOTAL_HEARTS = 3
   const VISION_LENGTH = 2
+  const DISCOUNT_FACTOR = 0.9
 
   const [springs, _] = useSprings(TILE_COUNT, (i) => {
     const row = Math.floor(i / Math.sqrt(TILE_COUNT))
@@ -138,7 +139,7 @@ export default function Tiles() {
 
     if (agent.steps === 0) return
 
-    let observation = observations.filter((obs) => obs.agentIdx === agentIdx && obs.rewards.length < N_STEPS)
+    let observation = observations.filter((obs) => obs.agentIdx === agentIdx && !obs.complete)
 
     let newObservation: AgentObservation = {
       agentIdx,
@@ -146,9 +147,10 @@ export default function Tiles() {
       action: { index: 0, name: 'left' },
       actionOldProbability: 0,
       actionNewProbability: 0,
-      rewards: [],
+      reward: 0,
+      complete: false,
       valueOutput: 0,
-      startStepTrajectoryNum: -1 * (agent.steps - TOTAL_STEPS),
+      startStepTrajectoryNum: Math.abs(agent.steps - TOTAL_STEPS),
     }
 
     let coinGain = 0
@@ -253,8 +255,16 @@ export default function Tiles() {
           newObservation.state.normalizedStepsRemaining = agent.steps / TOTAL_STEPS
           newObservation.state.normalizedHeartsRemaining = agent.hearts / TOTAL_HEARTS
 
-          observation.map((observation) => observation.rewards.push((heartGain / TOTAL_HEARTS) * 0.2 + coinGain * 0.8))
-
+          observation.map((observation) => {
+            if (Math.abs(agent.steps - TOTAL_STEPS) - observation.startStepTrajectoryNum > N_STEPS) {
+              observation.complete = true
+            } else {
+              observation.reward +=
+                ((heartGain / TOTAL_HEARTS) * 0.2 + coinGain * 0.8) *
+                Math.pow(DISCOUNT_FACTOR, Math.abs(agent.steps - TOTAL_STEPS) - observation.startStepTrajectoryNum - 1)
+            }
+          })
+          console.log(Math.abs(agent.steps - TOTAL_STEPS))
           observation.push(newObservation)
           setObservations((observations) => [...observations, newObservation])
         }
@@ -358,8 +368,16 @@ export default function Tiles() {
           newObservation.state.normalizedStepsRemaining = agent.steps / TOTAL_STEPS
           newObservation.state.normalizedHeartsRemaining = agent.hearts / TOTAL_HEARTS
 
-          observation.map((observation) => observation.rewards.push((heartGain / TOTAL_HEARTS) * 0.2 + coinGain * 0.8))
-
+          observation.map((observation) => {
+            if (Math.abs(agent.steps - TOTAL_STEPS) - observation.startStepTrajectoryNum > N_STEPS) {
+              observation.complete = true
+            } else {
+              observation.reward +=
+                ((heartGain / TOTAL_HEARTS) * 0.2 + coinGain * 0.8) *
+                Math.pow(DISCOUNT_FACTOR, Math.abs(agent.steps - TOTAL_STEPS) - observation.startStepTrajectoryNum - 1)
+            }
+          })
+          console.log(Math.abs(agent.steps - TOTAL_STEPS))
           observation.push(newObservation)
           setObservations((observations) => [...observations, newObservation])
         }
@@ -464,8 +482,16 @@ export default function Tiles() {
           newObservation.state.normalizedStepsRemaining = agent.steps / TOTAL_STEPS
           newObservation.state.normalizedHeartsRemaining = agent.hearts / TOTAL_HEARTS
 
-          observation.map((observation) => observation.rewards.push((heartGain / TOTAL_HEARTS) * 0.2 + coinGain * 0.8))
-
+          observation.map((observation) => {
+            if (Math.abs(agent.steps - TOTAL_STEPS) - observation.startStepTrajectoryNum > N_STEPS) {
+              observation.complete = true
+            } else {
+              observation.reward +=
+                ((heartGain / TOTAL_HEARTS) * 0.2 + coinGain * 0.8) *
+                Math.pow(DISCOUNT_FACTOR, Math.abs(agent.steps - TOTAL_STEPS) - observation.startStepTrajectoryNum - 1)
+            }
+          })
+          console.log(Math.abs(agent.steps - TOTAL_STEPS))
           observation.push(newObservation)
           setObservations((observations) => [...observations, newObservation])
         }
@@ -570,8 +596,16 @@ export default function Tiles() {
           newObservation.state.normalizedStepsRemaining = agent.steps / TOTAL_STEPS
           newObservation.state.normalizedHeartsRemaining = agent.hearts / TOTAL_HEARTS
 
-          observation.map((observation) => observation.rewards.push((heartGain / TOTAL_HEARTS) * 0.2 + coinGain * 0.8))
-
+          observation.map((observation) => {
+            if (Math.abs(agent.steps - TOTAL_STEPS) - observation.startStepTrajectoryNum > N_STEPS) {
+              observation.complete = true
+            } else {
+              observation.reward +=
+                ((heartGain / TOTAL_HEARTS) * 0.2 + coinGain * 0.8) *
+                Math.pow(DISCOUNT_FACTOR, Math.abs(agent.steps - TOTAL_STEPS) - observation.startStepTrajectoryNum - 1)
+            }
+          })
+          console.log(Math.abs(agent.steps - TOTAL_STEPS))
           observation.push(newObservation)
           setObservations((observations) => [...observations, newObservation])
         }
