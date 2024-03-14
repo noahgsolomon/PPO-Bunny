@@ -22,8 +22,6 @@ import {
   HoleTile,
   AgentObservation,
 } from '@/index.d'
-import { ArrowDown, ArrowLeft, ArrowRight, ArrowUp } from 'lucide-react'
-import { Button } from '@/components/ui/button'
 import { Perf } from 'r3f-perf'
 import { GlassBucket } from './Models/GlassBucket'
 
@@ -63,7 +61,10 @@ export default function Tiles() {
 
   const environment = useEnvironment()
 
+  const [mapResetCount, setMapResetCount] = useState(0)
+
   const agentTiles = useMemo(() => {
+    console.log('broke cache')
     const randTiles = []
     for (let i = 0; i < NUM_AGENTS; i++) {
       let rand = Math.round(Math.random() * TILE_COUNT - 1)
@@ -73,7 +74,7 @@ export default function Tiles() {
       randTiles.push(rand)
     }
     return randTiles
-  }, [])
+  }, [mapResetCount])
 
   const generateTileMap = () => {
     const newTileMap = springs.reduce(
@@ -100,24 +101,6 @@ export default function Tiles() {
     )
     return newTileMap
   }
-
-  useEffect(() => {
-    const newTileMap = generateTileMap()
-
-    environment.setCurrentAgentIdx(0)
-    for (let i = 0; i < NUM_AGENTS; i++) {
-      const clonedTileMap = structuredClone(newTileMap)
-      environment.agentEnvironment[i].setTileMap(clonedTileMap, i)
-      environment.agentEnvironment[i].setPosition(
-        {
-          x: agentTiles[i] % Math.sqrt(TILE_COUNT),
-          y: Math.floor(agentTiles[i] / Math.sqrt(TILE_COUNT)),
-        },
-        i,
-      )
-      environment.agentEnvironment[i].setStartingTile(agentTiles[i])
-    }
-  }, [])
 
   const [observations, setObservations] = useState<AgentObservation[]>([])
 
@@ -146,6 +129,9 @@ export default function Tiles() {
 
   const move = (direction: 'left' | 'right' | 'up' | 'down', agentIdx: number) => {
     const agent = environment.agentEnvironment[agentIdx]
+    console.log(agent.position)
+    console.log(agent.positionX)
+    console.log(agent.positionY)
     const TILE_COUNT = environment.TILE_COUNT
 
     let nextTileType, positionX, positionZ, rotation
@@ -277,7 +263,6 @@ export default function Tiles() {
                 Math.pow(DISCOUNT_FACTOR, Math.abs(agent.steps - TOTAL_STEPS) - observation.startStepTrajectoryNum - 1)
             }
           })
-          console.log(Math.abs(agent.steps - TOTAL_STEPS))
           observation.push(newObservation)
           setObservations((observations) => [...observations, newObservation])
         }
@@ -390,7 +375,6 @@ export default function Tiles() {
                 Math.pow(DISCOUNT_FACTOR, Math.abs(agent.steps - TOTAL_STEPS) - observation.startStepTrajectoryNum - 1)
             }
           })
-          console.log(Math.abs(agent.steps - TOTAL_STEPS))
           observation.push(newObservation)
           setObservations((observations) => [...observations, newObservation])
         }
@@ -504,7 +488,6 @@ export default function Tiles() {
                 Math.pow(DISCOUNT_FACTOR, Math.abs(agent.steps - TOTAL_STEPS) - observation.startStepTrajectoryNum - 1)
             }
           })
-          console.log(Math.abs(agent.steps - TOTAL_STEPS))
           observation.push(newObservation)
           setObservations((observations) => [...observations, newObservation])
         }
@@ -618,7 +601,6 @@ export default function Tiles() {
                 Math.pow(DISCOUNT_FACTOR, Math.abs(agent.steps - TOTAL_STEPS) - observation.startStepTrajectoryNum - 1)
             }
           })
-          console.log(Math.abs(agent.steps - TOTAL_STEPS))
           observation.push(newObservation)
           setObservations((observations) => [...observations, newObservation])
         }
@@ -627,12 +609,40 @@ export default function Tiles() {
   }
 
   useEffect(() => {
-    console.log(environment.agentEnvironment[environment.currentAgentIdx])
+    movementApi.start(() => {
+      return {
+        positionX: 0,
+        positionZ: 0,
+        rotation: 0,
+      }
+    })
 
+    const newTileMap = generateTileMap()
+
+    for (let i = 0; i < NUM_AGENTS; i++) {
+      environment.agentEnvironment[i].setPositionX(0, i)
+      environment.agentEnvironment[i].setPositionZ(0, i)
+      const clonedTileMap = structuredClone(newTileMap)
+      environment.agentEnvironment[i].setTileMap(clonedTileMap, i)
+      environment.agentEnvironment[i].setPosition(
+        {
+          x: agentTiles[i] % Math.sqrt(TILE_COUNT),
+          y: Math.floor(agentTiles[i] / Math.sqrt(TILE_COUNT)),
+        },
+        i,
+      )
+
+      environment.agentEnvironment[i].setStartingTile(agentTiles[i])
+    }
+  }, [agentTiles])
+
+  useEffect(() => {
     const moveAgents = () => {
       const directions: ('left' | 'right' | 'up' | 'down')[] = ['left', 'right', 'up', 'down']
 
       let numFinished = 0
+
+      // console.log(environment.agentEnvironment[environment.currentAgentIdx].position)
 
       for (let i = 0; i < NUM_AGENTS; i++) {
         if (environment.agentEnvironment[i].steps <= 0 || environment.agentEnvironment[i].hearts <= 0) {
@@ -643,16 +653,13 @@ export default function Tiles() {
       }
 
       if (numFinished > NUM_AGENTS / 2) {
-        const newTileMap = generateTileMap()
-        for (let i = 0; i < NUM_AGENTS; i++) {
-          const clonedTileMap = structuredClone(newTileMap)
-          environment.agentEnvironment[i].setTileMap(clonedTileMap, i)
-        }
+        environment.setCurrentAgentIdx(0)
         resetAgentMetrics()
+        setMapResetCount((prevCount) => prevCount + 1)
       }
     }
 
-    const intervalId = setInterval(moveAgents, 1000)
+    const intervalId = setInterval(moveAgents, 500)
 
     return () => {
       clearInterval(intervalId)
@@ -740,7 +747,7 @@ export default function Tiles() {
         fadeStrength={1}
         infiniteGrid
       />
-      <Html scale={0.5} position-z={8}>
+      {/* <Html scale={0.5} position-z={8}>
         <Button
           onClick={() => move('left', 1)}
           variant='none'
@@ -772,7 +779,7 @@ export default function Tiles() {
         >
           <ArrowDown className='w-10 h-10' />
         </Button>
-      </Html>
+      </Html> */}
     </>
   )
 }
