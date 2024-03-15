@@ -24,17 +24,18 @@ import {
 } from '@/index.d'
 import { Perf } from 'r3f-perf'
 import { GlassBucket } from './Models/GlassBucket'
+import useGameState from './store/useGameState'
 
 export default function Tiles() {
   const AnimatedGrid = animated(Grid)
-  const TILE_COUNT = 100
-  const NUM_AGENTS = 5
+  const TILE_COUNT = 225
+  const NUM_AGENTS = 10
   const N_STEPS = 6
-  const TOTAL_STEPS = 20
+  const TOTAL_STEPS = 50
   const TOTAL_HEARTS = 3
   const VISION_LENGTH = 2
   const DISCOUNT_FACTOR = 0.9
-  const OBSERVATION_RESERVOIR = 200
+  const OBSERVATION_RESERVOIR = 500
 
   const [springs, _] = useSprings(TILE_COUNT, (i) => {
     const row = Math.floor(i / Math.sqrt(TILE_COUNT))
@@ -60,11 +61,11 @@ export default function Tiles() {
   const player = useRef<Group>()
 
   const environment = useEnvironment()
+  const gameState = useGameState()
 
   const [mapResetCount, setMapResetCount] = useState(0)
 
   const agentTiles = useMemo(() => {
-    console.log('broke cache')
     const randTiles = []
     for (let i = 0; i < NUM_AGENTS; i++) {
       let rand = Math.round(Math.random() * TILE_COUNT - 1)
@@ -129,9 +130,6 @@ export default function Tiles() {
 
   const move = (direction: 'left' | 'right' | 'up' | 'down', agentIdx: number) => {
     const agent = environment.agentEnvironment[agentIdx]
-    console.log(agent.position)
-    console.log(agent.positionX)
-    console.log(agent.positionY)
     const TILE_COUNT = environment.TILE_COUNT
 
     let nextTileType, positionX, positionZ, rotation
@@ -159,7 +157,7 @@ export default function Tiles() {
       case 'left':
         nextTileType = agent.tileMap[agent.position.x - 1 + Math.sqrt(TILE_COUNT) * agent.position.y]
 
-        if (agent.position.x - 1 >= 0 && nextTileType.type.type !== 'HOLE') {
+        if (agent.position.x - 1 >= 0 && nextTileType?.type?.type !== 'HOLE') {
           agent.position.x -= 1
           positionX = agent.positionX - 1.1
           rotation = -Math.PI * 0.5
@@ -640,9 +638,11 @@ export default function Tiles() {
     const moveAgents = () => {
       const directions: ('left' | 'right' | 'up' | 'down')[] = ['left', 'right', 'up', 'down']
 
-      let numFinished = 0
+      if (observations.length / OBSERVATION_RESERVOIR >= 1) {
+        gameState.setState('OPTIMIZATION')
+      }
 
-      // console.log(environment.agentEnvironment[environment.currentAgentIdx].position)
+      let numFinished = 0
 
       for (let i = 0; i < NUM_AGENTS; i++) {
         if (environment.agentEnvironment[i].steps <= 0 || environment.agentEnvironment[i].hearts <= 0) {
@@ -653,21 +653,22 @@ export default function Tiles() {
       }
 
       if (numFinished > NUM_AGENTS / 2) {
-        environment.setCurrentAgentIdx(0)
         resetAgentMetrics()
         setMapResetCount((prevCount) => prevCount + 1)
       }
     }
 
-    const intervalId = setInterval(moveAgents, 500)
+    if (gameState.state === 'COLLECTION') {
+      const intervalId = setInterval(moveAgents, 150)
 
-    return () => {
-      clearInterval(intervalId)
+      return () => {
+        clearInterval(intervalId)
+      }
     }
-  }, [environment.agentEnvironment])
+  }, [environment.agentEnvironment, gameState.state])
   return (
     <>
-      <Perf />
+      {/* <Perf /> */}
       <Center top position-y={0.3}>
         {springs.map((props, i) => {
           const tile = environment?.agentEnvironment[environment.currentAgentIdx]?.tileMap[i]
@@ -717,11 +718,11 @@ export default function Tiles() {
         })}
       </Center>
       <animated.mesh position-y={baseSpring.positionY} rotation-x={Math.PI * 0.5}>
-        <RoundedBox receiveShadow args={[20, 20]}>
+        <RoundedBox receiveShadow args={[30, 30]}>
           <meshStandardMaterial color={'#212336'} />
         </RoundedBox>
       </animated.mesh>
-      <group position-x={7.5} position-z={-7.5} position-y={-1.5}>
+      <group position-x={10} position-z={-10} position-y={-1.5}>
         <Text3D position-y={5} position-x={-0.35} size={0.4} font={'/roboto.json'}>
           {Math.round((observations.length / OBSERVATION_RESERVOIR) * 100)}%
         </Text3D>

@@ -1,15 +1,15 @@
 import { create } from 'zustand'
 import { EnvironmentState, Position, TileType } from '@/index.d'
 
-const NUM_AGENTS = 5
+const NUM_AGENTS = 10
 
 const useEnvironment = create<EnvironmentState>()((set) => ({
-  TILE_COUNT: 100,
+  TILE_COUNT: 225,
   agentEnvironment: [...Array(NUM_AGENTS)].map((_, i) => ({
     position: { x: 0, y: 0 },
     tileMap: [],
     visionCapacity: 5,
-    steps: 20,
+    steps: 50,
     coins: 0,
     index: i,
     startingTile: 0,
