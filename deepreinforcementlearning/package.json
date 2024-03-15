@@ -28,6 +28,7 @@
     "@react-three/fiber": "^8.15.12",
     "@react-three/postprocessing": "^2.16.2",
     "@studio-freight/lenis": "^1.0.39",
+    "@tensorflow/tfjs": "^4.17.0",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.0",
     "glsl-random": "^0.0.5",

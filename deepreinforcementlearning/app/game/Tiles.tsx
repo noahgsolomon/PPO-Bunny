@@ -134,7 +134,7 @@ export default function Tiles() {
 
     let nextTileType, positionX, positionZ, rotation
 
-    if (agent.steps === 0) return
+    if (agent.steps === 0 || agent.hearts === 0) return
 
     let observation = observations.filter((obs) => obs.agentIdx === agentIdx && !obs.complete)
 
@@ -262,6 +262,7 @@ export default function Tiles() {
             }
           })
           observation.push(newObservation)
+          console.log(newObservation)
           setObservations((observations) => [...observations, newObservation])
         }
         break

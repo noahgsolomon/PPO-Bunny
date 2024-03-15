@@ -89,7 +89,7 @@ export default function Page() {
 
       <animated.div
         style={initialAnimation}
-        className='z-10 absolute top-8 text-center w-full flex items-center flex-col gap-4'
+        className='z-10 absolute top-16 text-center w-full flex items-center flex-col gap-4'
       >
         <h1 className=' font-bold italic text-4xl'>BUNNY BONANZA</h1>
         <div className='flex flex-row gap-2'>
@@ -110,7 +110,7 @@ export default function Page() {
       </Button> */}
       <animated.div
         style={playingAnimation}
-        className='absolute w-full z-10 left-16 top-12 flex flex-row gap-2 items-center'
+        className='hidden absolute w-full z-10 left-16 top-12 md:flex flex-row gap-2 items-center'
       >
         <Avatar
           style={{ borderColor: colors[environment.currentAgentIdx] ?? '#ffffff' }}
