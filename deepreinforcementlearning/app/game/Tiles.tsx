@@ -29,16 +29,16 @@ import * as tf from '@tensorflow/tfjs'
 import '@tensorflow/tfjs-backend-webgl'
 
 export default function Tiles() {
-  const [model, setModel] = useState<tf.LayersModel>(null)
+  const [policyNetwork, setPolicyNetwork] = useState<tf.LayersModel>(null)
 
   useEffect(() => {
     const loadModel = async () => {
       try {
-        const model = await tf.loadLayersModel(
-          'https://raw.githubusercontent.com/noahgsolomon/bunnymodel/main/model.json',
+        const policyNetwork = await tf.loadLayersModel(
+          'https://raw.githubusercontent.com/noahgsolomon/bunnymodel/main/policy/model.json',
         )
         console.log('Model loaded successfully')
-        setModel(model)
+        setPolicyNetwork(policyNetwork)
       } catch (error) {
         console.error('Error loading the model:', error)
       }
@@ -152,9 +152,9 @@ export default function Tiles() {
     const agent = environment.agentEnvironment[agentIdx]
     const TILE_COUNT = environment.TILE_COUNT
 
-    let nextTileType, positionX, positionZ, rotation
-
     if (agent.steps === 0 || agent.hearts === 0) return
+
+    let nextTileType, positionX, positionZ, rotation
 
     let observation = observations.filter((obs) => obs.agentIdx === agentIdx && !obs.complete)
 
@@ -655,6 +655,8 @@ export default function Tiles() {
     }
   }, [agentTiles])
 
+  const arr = [...Array(122).fill(1)]
+
   useEffect(() => {
     const moveAgents = async () => {
       const directions: ('left' | 'right' | 'up' | 'down')[] = ['left', 'right', 'up', 'down']
@@ -666,17 +668,18 @@ export default function Tiles() {
 
       let numFinished = 0
 
-      const inputTensor = tf.tensor2d([[1], [1], [1], [1], [1], [1], [1], [1], [1], [1]], [NUM_AGENTS, 1])
-      const logits = model.predict(inputTensor) as tf.Tensor2D
+      const arrTensor = tf.tensor2d([arr], [1, arr.length])
+      const inputTensor = tf.tile(arrTensor, [NUM_AGENTS, 1])
+      const logits = policyNetwork.predict(inputTensor) as tf.Tensor2D
       const prob = tf.softmax(logits)
       const idx = await tf.multinomial(prob, 1).array()
 
       for (let i = 0; i < NUM_AGENTS; i++) {
         if (environment.agentEnvironment[i].steps <= 0 || environment.agentEnvironment[i].hearts <= 0) {
           numFinished += 1
-          continue
+        } else {
+          move(directions[idx[i][0]], i)
         }
-        move(directions[idx[i][0]], i)
       }
 
       if (numFinished > NUM_AGENTS / 2) {
