@@ -50,3 +50,5 @@ export const Player = forwardRef<any, any>((props, ref) => {
     </animated.group>
   )
 })
+
+Player.displayName = 'Player'

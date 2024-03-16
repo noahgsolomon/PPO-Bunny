@@ -25,8 +25,28 @@ import {
 import { Perf } from 'r3f-perf'
 import { GlassBucket } from './Models/GlassBucket'
 import useGameState from './store/useGameState'
+import * as tf from '@tensorflow/tfjs'
+import '@tensorflow/tfjs-backend-webgl'
 
 export default function Tiles() {
+  const [model, setModel] = useState<tf.LayersModel>(null)
+
+  useEffect(() => {
+    const loadModel = async () => {
+      try {
+        const model = await tf.loadLayersModel(
+          'https://raw.githubusercontent.com/noahgsolomon/bunnymodel/main/model.json',
+        )
+        console.log('Model loaded successfully')
+        setModel(model)
+      } catch (error) {
+        console.error('Error loading the model:', error)
+      }
+    }
+
+    loadModel()
+  }, [])
+
   const AnimatedGrid = animated(Grid)
   const TILE_COUNT = 225
   const NUM_AGENTS = 10
@@ -636,21 +656,27 @@ export default function Tiles() {
   }, [agentTiles])
 
   useEffect(() => {
-    const moveAgents = () => {
+    const moveAgents = async () => {
       const directions: ('left' | 'right' | 'up' | 'down')[] = ['left', 'right', 'up', 'down']
 
       if (observations.length / OBSERVATION_RESERVOIR >= 1) {
         gameState.setState('OPTIMIZATION')
+        return
       }
 
       let numFinished = 0
 
+      const inputTensor = tf.tensor2d([[1], [1], [1], [1], [1], [1], [1], [1], [1], [1]], [NUM_AGENTS, 1])
+      const logits = model.predict(inputTensor) as tf.Tensor2D
+      const prob = tf.softmax(logits)
+      const idx = await tf.multinomial(prob, 1).array()
+
       for (let i = 0; i < NUM_AGENTS; i++) {
         if (environment.agentEnvironment[i].steps <= 0 || environment.agentEnvironment[i].hearts <= 0) {
           numFinished += 1
+          continue
         }
-        const randomDirection = directions[Math.floor(Math.random() * directions.length)]
-        move(randomDirection, i)
+        move(directions[idx[i][0]], i)
       }
 
       if (numFinished > NUM_AGENTS / 2) {
@@ -660,7 +686,7 @@ export default function Tiles() {
     }
 
     if (gameState.state === 'COLLECTION') {
-      const intervalId = setInterval(moveAgents, 150)
+      const intervalId = setInterval(moveAgents, 100)
 
       return () => {
         clearInterval(intervalId)

@@ -5,12 +5,9 @@ import { Button } from '@/components/ui/button'
 import { config } from '@react-spring/three'
 import { animated, useSpring, config as webConfig } from '@react-spring/web'
 import { PerspectiveCamera, PresentationControls } from '@react-three/drei'
-import * as tf from '@tensorflow/tfjs'
-import '@tensorflow/tfjs-backend-webgl'
 import { Info, Loader2, Trophy } from 'lucide-react'
 import dynamic from 'next/dynamic'
 import Image from 'next/image'
-import { useEffect } from 'react'
 import Lights from './Lights'
 import Tiles from './Tiles'
 import useEnvironment from './store/useEnvironment'
@@ -47,19 +44,6 @@ const colors = [
 ]
 
 export default function Page() {
-  useEffect(() => {
-    const model = tf.sequential()
-    model.add(tf.layers.dense({ units: 64, inputShape: [1] }))
-    model.add(tf.layers.dense({ units: 4 }))
-
-    const inputTensor = tf.tensor2d([[1]], [1, 1])
-    const logits = model.predict(inputTensor) as tf.Tensor2D
-    const prob = tf.softmax(logits)
-    const idx = tf.multinomial(prob, 1)
-    idx.print()
-    model.save('downloads://model.json')
-  }, [])
-
   const environment = useEnvironment()
   const gameState = useGameState()
 
@@ -106,13 +90,13 @@ export default function Page() {
         style={initialAnimation}
         className='z-10 absolute top-16 text-center w-full flex items-center flex-col gap-4'
       >
-        <h1 className=' font-bold italic text-4xl'>BUNNY BONANZA</h1>
+        <h1 className='text-4xl font-bold italic'>BUNNY BONANZA</h1>
         <div className='flex flex-row gap-2'>
           <Button className='flex flex-row gap-2 ' onClick={() => gameState.setState('COLLECTION')} size='lg'>
-            Train <Trophy className='h-4 w-4' />
+            Train <Trophy className='size-4' />
           </Button>
-          <Button size='lg' className='flex flex-row gap-2 ' variant='outline'>
-            Info <Info className='w-4 h-4' />
+          <Button size='lg' className='flex flex-row gap-2' variant='outline'>
+            Info <Info className='size-4' />
           </Button>
         </div>
       </animated.div>
