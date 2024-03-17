@@ -64,7 +64,7 @@ export type Action = {
 
 export type AgentObservation = {
   agentIdx: number
-  state: State
+  state: State | number[]
   action: Action
   actionOldProbability: number
   actionNewProbability: number
