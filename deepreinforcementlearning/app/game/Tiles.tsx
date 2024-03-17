@@ -1,7 +1,7 @@
 'use client'
 
 import { animated, config, useSpring, useSprings } from '@react-spring/three'
-import { Center, Grid, Html, RoundedBox, Text3D } from '@react-three/drei'
+import { Center, Grid, RoundedBox, Text3D } from '@react-three/drei'
 import { Player } from './Player'
 import { Fragment, useEffect, useMemo, useRef, useState } from 'react'
 import { Group } from 'three'
@@ -21,30 +21,35 @@ import {
   HologramTile,
   HoleTile,
   AgentObservation,
+  State,
 } from '@/index.d'
 import { Perf } from 'r3f-perf'
 import { GlassBucket } from './Models/GlassBucket'
 import useGameState from './store/useGameState'
 import * as tf from '@tensorflow/tfjs'
 import '@tensorflow/tfjs-backend-webgl'
+import RadarField from './RadarField'
 
 export default function Tiles() {
   const [policyNetwork, setPolicyNetwork] = useState<tf.LayersModel>(null)
+  const [valueNetwork, setValueNetwork] = useState<tf.LayersModel>(null)
 
   useEffect(() => {
-    const loadModel = async () => {
+    const loadModels = async () => {
       try {
-        const policyNetwork = await tf.loadLayersModel(
-          'https://raw.githubusercontent.com/noahgsolomon/bunnymodel/main/policy/model.json',
-        )
-        console.log('Model loaded successfully')
+        const [policyNetwork, valueNetwork] = await Promise.all([
+          tf.loadLayersModel('https://raw.githubusercontent.com/noahgsolomon/bunnymodel/main/policy/model.json'),
+          tf.loadLayersModel('https://raw.githubusercontent.com/noahgsolomon/bunnymodel/main/value/model.json'),
+        ])
+        console.log('Models loaded successfully')
         setPolicyNetwork(policyNetwork)
+        setValueNetwork(valueNetwork)
       } catch (error) {
         console.error('Error loading the model:', error)
       }
     }
 
-    loadModel()
+    loadModels()
   }, [])
 
   const AnimatedGrid = animated(Grid)
@@ -53,7 +58,7 @@ export default function Tiles() {
   const N_STEPS = 6
   const TOTAL_STEPS = 50
   const TOTAL_HEARTS = 3
-  const VISION_LENGTH = 2
+  const VISION_LENGTH = 4
   const DISCOUNT_FACTOR = 0.9
   const OBSERVATION_RESERVOIR = 500
 
@@ -148,7 +153,7 @@ export default function Tiles() {
     }
   }
 
-  const move = (direction: 'left' | 'right' | 'up' | 'down', agentIdx: number) => {
+  const move = (direction: 'left' | 'right' | 'up' | 'down', agentIdx: number, oldProb: number, state: State) => {
     const agent = environment.agentEnvironment[agentIdx]
     const TILE_COUNT = environment.TILE_COUNT
 
@@ -162,7 +167,7 @@ export default function Tiles() {
       agentIdx,
       state: { tileState: [], normalizedHeartsRemaining: 1, normalizedStepsRemaining: 1 },
       action: { index: 0, name: 'left' },
-      actionOldProbability: 0,
+      actionOldProbability: oldProb,
       actionNewProbability: 0,
       reward: 0,
       complete: false,
@@ -223,54 +228,7 @@ export default function Tiles() {
           newObservation.action.index = 0
           newObservation.action.name = 'left'
 
-          const agentPosition = agent.position
-
-          const nearTiles = []
-
-          for (let y = -VISION_LENGTH; y <= VISION_LENGTH; y++) {
-            for (let x = -VISION_LENGTH; x <= VISION_LENGTH; x++) {
-              if (x === 0 && y === 0) continue
-
-              const tileX = agentPosition.x + x
-              const tileY = agentPosition.y + y
-
-              if (tileX < 0 || tileX >= Math.sqrt(TILE_COUNT) || tileY < 0 || tileY >= Math.sqrt(TILE_COUNT)) {
-                nearTiles.push({
-                  type: {
-                    type: 'DEFAULT',
-                    heartGain: 0,
-                    coinGain: 0,
-                    stepGain: 0,
-                  },
-                  position: {
-                    x: tileX,
-                    y: tileY,
-                  },
-                })
-              } else {
-                const tile = agent.tileMap[tileX + Math.sqrt(TILE_COUNT) * tileY]
-                nearTiles.push(tile)
-              }
-            }
-          }
-
-          newObservation.state.tileState = nearTiles.map((tile) => {
-            const xDiff = tile.position.x - agentPosition.x
-            const yDiff = tile.position.y - agentPosition.y
-            const distance = Math.max(Math.abs(xDiff), Math.abs(yDiff))
-            const significanceFactor = VISION_LENGTH / (VISION_LENGTH - 1 + distance)
-
-            return {
-              heartGain: tile.type.heartGain * significanceFactor,
-              coinGain: tile.type.coinGain * significanceFactor,
-              stepGain: tile.type.stepGain * significanceFactor,
-              dirX: xDiff === 0 ? 0 : xDiff > 0 ? 1 : -1,
-              dirY: yDiff === 0 ? 0 : yDiff > 0 ? 1 : -1,
-            }
-          })
-
-          newObservation.state.normalizedStepsRemaining = agent.steps / TOTAL_STEPS
-          newObservation.state.normalizedHeartsRemaining = agent.hearts / TOTAL_HEARTS
+          newObservation.state = state
 
           observation.map((observation) => {
             if (Math.abs(agent.steps - TOTAL_STEPS) - observation.startStepTrajectoryNum > N_STEPS) {
@@ -282,7 +240,7 @@ export default function Tiles() {
             }
           })
           observation.push(newObservation)
-          console.log(newObservation)
+          // console.log(newObservation)
           setObservations((observations) => [...observations, newObservation])
         }
         break
@@ -336,54 +294,7 @@ export default function Tiles() {
           newObservation.action.index = 1
           newObservation.action.name = 'right'
 
-          const agentPosition = agent.position
-
-          const nearTiles = []
-
-          for (let y = -VISION_LENGTH; y <= VISION_LENGTH; y++) {
-            for (let x = -VISION_LENGTH; x <= VISION_LENGTH; x++) {
-              if (x === 0 && y === 0) continue
-
-              const tileX = agentPosition.x + x
-              const tileY = agentPosition.y + y
-
-              if (tileX < 0 || tileX >= Math.sqrt(TILE_COUNT) || tileY < 0 || tileY >= Math.sqrt(TILE_COUNT)) {
-                nearTiles.push({
-                  type: {
-                    type: 'DEFAULT',
-                    heartGain: 0,
-                    coinGain: 0,
-                    stepGain: 0,
-                  },
-                  position: {
-                    x: tileX,
-                    y: tileY,
-                  },
-                })
-              } else {
-                const tile = agent.tileMap[tileX + Math.sqrt(TILE_COUNT) * tileY]
-                nearTiles.push(tile)
-              }
-            }
-          }
-
-          newObservation.state.tileState = nearTiles.map((tile) => {
-            const xDiff = tile.position.x - agentPosition.x
-            const yDiff = tile.position.y - agentPosition.y
-            const distance = Math.max(Math.abs(xDiff), Math.abs(yDiff))
-            const significanceFactor = VISION_LENGTH / (VISION_LENGTH - 1 + distance)
-
-            return {
-              heartGain: tile.type.heartGain * significanceFactor,
-              coinGain: tile.type.coinGain * significanceFactor,
-              stepGain: tile.type.stepGain * significanceFactor,
-              dirX: xDiff === 0 ? 0 : xDiff > 0 ? 1 : -1,
-              dirY: yDiff === 0 ? 0 : yDiff > 0 ? 1 : -1,
-            }
-          })
-
-          newObservation.state.normalizedStepsRemaining = agent.steps / TOTAL_STEPS
-          newObservation.state.normalizedHeartsRemaining = agent.hearts / TOTAL_HEARTS
+          newObservation.state = state
 
           observation.map((observation) => {
             if (Math.abs(agent.steps - TOTAL_STEPS) - observation.startStepTrajectoryNum > N_STEPS) {
@@ -449,54 +360,7 @@ export default function Tiles() {
           newObservation.action.index = 2
           newObservation.action.name = 'up'
 
-          const agentPosition = agent.position
-
-          const nearTiles = []
-
-          for (let y = -VISION_LENGTH; y <= VISION_LENGTH; y++) {
-            for (let x = -VISION_LENGTH; x <= VISION_LENGTH; x++) {
-              if (x === 0 && y === 0) continue
-
-              const tileX = agentPosition.x + x
-              const tileY = agentPosition.y + y
-
-              if (tileX < 0 || tileX >= Math.sqrt(TILE_COUNT) || tileY < 0 || tileY >= Math.sqrt(TILE_COUNT)) {
-                nearTiles.push({
-                  type: {
-                    type: 'DEFAULT',
-                    heartGain: 0,
-                    coinGain: 0,
-                    stepGain: 0,
-                  },
-                  position: {
-                    x: tileX,
-                    y: tileY,
-                  },
-                })
-              } else {
-                const tile = agent.tileMap[tileX + Math.sqrt(TILE_COUNT) * tileY]
-                nearTiles.push(tile)
-              }
-            }
-          }
-
-          newObservation.state.tileState = nearTiles.map((tile) => {
-            const xDiff = tile.position.x - agentPosition.x
-            const yDiff = tile.position.y - agentPosition.y
-            const distance = Math.max(Math.abs(xDiff), Math.abs(yDiff))
-            const significanceFactor = VISION_LENGTH / (VISION_LENGTH - 1 + distance)
-
-            return {
-              heartGain: tile.type.heartGain * significanceFactor,
-              coinGain: tile.type.coinGain * significanceFactor,
-              stepGain: tile.type.stepGain * significanceFactor,
-              dirX: xDiff === 0 ? 0 : xDiff > 0 ? 1 : -1,
-              dirY: yDiff === 0 ? 0 : yDiff > 0 ? 1 : -1,
-            }
-          })
-
-          newObservation.state.normalizedStepsRemaining = agent.steps / TOTAL_STEPS
-          newObservation.state.normalizedHeartsRemaining = agent.hearts / TOTAL_HEARTS
+          newObservation.state = state
 
           observation.map((observation) => {
             if (Math.abs(agent.steps - TOTAL_STEPS) - observation.startStepTrajectoryNum > N_STEPS) {
@@ -562,54 +426,8 @@ export default function Tiles() {
           newObservation.action.index = 3
           newObservation.action.name = 'down'
 
-          const agentPosition = agent.position
-
-          const nearTiles = []
-
-          for (let y = -VISION_LENGTH; y <= VISION_LENGTH; y++) {
-            for (let x = -VISION_LENGTH; x <= VISION_LENGTH; x++) {
-              if (x === 0 && y === 0) continue
-
-              const tileX = agentPosition.x + x
-              const tileY = agentPosition.y + y
-
-              if (tileX < 0 || tileX >= Math.sqrt(TILE_COUNT) || tileY < 0 || tileY >= Math.sqrt(TILE_COUNT)) {
-                nearTiles.push({
-                  type: {
-                    type: 'DEFAULT',
-                    heartGain: 0,
-                    coinGain: 0,
-                    stepGain: 0,
-                  },
-                  position: {
-                    x: tileX,
-                    y: tileY,
-                  },
-                })
-              } else {
-                const tile = agent.tileMap[tileX + Math.sqrt(TILE_COUNT) * tileY]
-                nearTiles.push(tile)
-              }
-            }
-          }
-
-          newObservation.state.tileState = nearTiles.map((tile) => {
-            const xDiff = tile.position.x - agentPosition.x
-            const yDiff = tile.position.y - agentPosition.y
-            const distance = Math.max(Math.abs(xDiff), Math.abs(yDiff))
-            const significanceFactor = VISION_LENGTH / (VISION_LENGTH - 1 + distance)
-
-            return {
-              heartGain: tile.type.heartGain * significanceFactor,
-              coinGain: tile.type.coinGain * significanceFactor,
-              stepGain: tile.type.stepGain * significanceFactor,
-              dirX: xDiff === 0 ? 0 : xDiff > 0 ? 1 : -1,
-              dirY: yDiff === 0 ? 0 : yDiff > 0 ? 1 : -1,
-            }
-          })
-
-          newObservation.state.normalizedStepsRemaining = agent.steps / TOTAL_STEPS
-          newObservation.state.normalizedHeartsRemaining = agent.hearts / TOTAL_HEARTS
+          newObservation.state = state
+          newObservation.actionOldProbability = oldProb
 
           observation.map((observation) => {
             if (Math.abs(agent.steps - TOTAL_STEPS) - observation.startStepTrajectoryNum > N_STEPS) {
@@ -655,10 +473,9 @@ export default function Tiles() {
     }
   }, [agentTiles])
 
-  const arr = [...Array(122).fill(1)]
-
   useEffect(() => {
     const moveAgents = async () => {
+      const startTime = performance.now()
       const directions: ('left' | 'right' | 'up' | 'down')[] = ['left', 'right', 'up', 'down']
 
       if (observations.length / OBSERVATION_RESERVOIR >= 1) {
@@ -668,17 +485,93 @@ export default function Tiles() {
 
       let numFinished = 0
 
-      const arrTensor = tf.tensor2d([arr], [1, arr.length])
-      const inputTensor = tf.tile(arrTensor, [NUM_AGENTS, 1])
-      const logits = policyNetwork.predict(inputTensor) as tf.Tensor2D
+      const states: State[] = []
+
+      for (const agent of environment.agentEnvironment) {
+        const agentPosition = agent.position
+
+        const nearTiles = []
+
+        for (let y = -VISION_LENGTH; y <= VISION_LENGTH; y++) {
+          for (let x = -VISION_LENGTH; x <= VISION_LENGTH; x++) {
+            if (x === 0 && y === 0) continue
+
+            const tileX = agentPosition.x + x
+            const tileY = agentPosition.y + y
+
+            if (tileX < 0 || tileX >= Math.sqrt(TILE_COUNT) || tileY < 0 || tileY >= Math.sqrt(TILE_COUNT)) {
+              nearTiles.push({
+                type: {
+                  type: 'DEFAULT',
+                  heartGain: 0,
+                  coinGain: 0,
+                  stepGain: 0,
+                },
+                position: {
+                  x: tileX,
+                  y: tileY,
+                },
+              })
+            } else {
+              const tile = agent.tileMap[tileX + Math.sqrt(TILE_COUNT) * tileY]
+              nearTiles.push(tile)
+            }
+          }
+        }
+
+        let state: State = {
+          tileState: [],
+          normalizedHeartsRemaining: 1,
+          normalizedStepsRemaining: 1,
+        }
+
+        state.normalizedStepsRemaining = agent.steps / TOTAL_STEPS
+        state.normalizedHeartsRemaining = agent.hearts / TOTAL_HEARTS
+        state.tileState = nearTiles.map((tile) => {
+          const xDiff = tile.position.x - agentPosition.x
+          const yDiff = tile.position.y - agentPosition.y
+          const distance = Math.max(Math.abs(xDiff), Math.abs(yDiff))
+          const significanceFactor = VISION_LENGTH / (VISION_LENGTH - 1 + distance)
+
+          return {
+            heartGain: tile.type.heartGain * significanceFactor,
+            coinGain: tile.type.coinGain * significanceFactor,
+            stepGain: tile.type.stepGain * significanceFactor,
+            dirX: xDiff === 0 ? 0 : xDiff > 0 ? 1 : -1,
+            dirY: yDiff === 0 ? 0 : yDiff > 0 ? 1 : -1,
+          }
+        })
+
+        states.push(state)
+      }
+
+      const input: number[][] = states.map((agentObservation) => {
+        return [
+          agentObservation.normalizedHeartsRemaining,
+          agentObservation.normalizedStepsRemaining,
+          ...agentObservation.tileState.flatMap((tile: any) => [
+            tile.coinGain,
+            tile.dirX,
+            tile.dirY,
+            tile.heartGain,
+            tile.stepGain,
+          ]),
+        ]
+      })
+
+      console.log(input)
+
+      const logits = policyNetwork.predict(tf.tensor(input)) as tf.Tensor2D
       const prob = tf.softmax(logits)
       const idx = await tf.multinomial(prob, 1).array()
+      const probArr = await prob.array()
 
       for (let i = 0; i < NUM_AGENTS; i++) {
         if (environment.agentEnvironment[i].steps <= 0 || environment.agentEnvironment[i].hearts <= 0) {
           numFinished += 1
         } else {
-          move(directions[idx[i][0]], i)
+          console.log(probArr[i][idx[i][0]])
+          move(directions[idx[i][0]], i, probArr[i][idx[i][0]], states[i])
         }
       }
 
@@ -686,16 +579,21 @@ export default function Tiles() {
         resetAgentMetrics()
         setMapResetCount((prevCount) => prevCount + 1)
       }
+
+      const endTime = performance.now()
+      const executionTime = endTime - startTime
+      console.log(`moveAgents execution time: ${executionTime} ms`)
     }
 
     if (gameState.state === 'COLLECTION') {
-      const intervalId = setInterval(moveAgents, 100)
+      const intervalId = setInterval(moveAgents, 500)
 
       return () => {
         clearInterval(intervalId)
       }
     }
   }, [environment.agentEnvironment, gameState.state])
+
   return (
     <>
       {/* <Perf /> */}
@@ -727,7 +625,11 @@ export default function Tiles() {
                           position-y={environment.agentEnvironment[environment.currentAgentIdx].positionY}
                           ref={player}
                         />
-                        {/* <RadarField /> */}
+                        <RadarField
+                          position-x={movement[environment.currentAgentIdx].positionX}
+                          position-z={movement[environment.currentAgentIdx].positionZ}
+                          viewDistance={VISION_LENGTH * 2 + 1}
+                        />
                       </>
                     ) : (
                       <Clone movement={movement} i={i} />
