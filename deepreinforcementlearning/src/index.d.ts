@@ -1,6 +1,6 @@
 export const DefaultTile = { heartGain: 0, coinGain: 0, stepGain: -1, type: 'DEFAULT' }
 export const BombTile = { heartGain: -2, coinGain: -3, stepGain: -1, type: 'BOMB', enabled: true }
-export const HologramTile = { heartGain: 0, coinGain: 0, stepGain: 0, type: 'HOLOGRAM' }
+export const HologramTile = { heartGain: -3, coinGain: 0, stepGain: -1, type: 'HOLOGRAM' }
 export const GumTile = { heartGain: 0, coinGain: 3, stepGain: -1, type: 'GUM' }
 export const PlumTile = { heartGain: 0, coinGain: 1, stepGain: -1, type: 'PLUM' }
 export const HoleTile = { heartGain: 0, coinGain: 0, stepGain: 0, type: 'HOLE' }
@@ -14,8 +14,6 @@ export type AgentEnvironment = {
   tileMap: { type: TileType; position: Position }[]
   setTileMap: (tiles: { type: TileType; position: Position }[], i: number) => void
   index: number
-  visionCapacity: number
-  setVisionCapacity: (visionCapacity: number, i: number) => void
   position: Position
   setPosition: (position: Position, i: number) => void
   steps: number

@@ -8,7 +8,6 @@ const useEnvironment = create<EnvironmentState>()((set) => ({
   agentEnvironment: [...Array(NUM_AGENTS)].map((_, i) => ({
     position: { x: 0, y: 0 },
     tileMap: [],
-    visionCapacity: 5,
     steps: 50,
     coins: 0,
     index: i,
@@ -49,12 +48,6 @@ const useEnvironment = create<EnvironmentState>()((set) => ({
     setTileMap: (tileMap: { type: TileType; position: Position }[], i: number) =>
       set((state) => ({
         agentEnvironment: state.agentEnvironment.map((agent, idx) => (idx === i ? { ...agent, tileMap } : agent)),
-      })),
-    setVisionCapacity: (visionCapacity: number, i: number) =>
-      set((state) => ({
-        agentEnvironment: state.agentEnvironment.map((agent, idx) =>
-          idx === i ? { ...agent, visionCapacity } : agent,
-        ),
       })),
     setSteps: (steps: number, i: number) =>
       set((state) => ({
