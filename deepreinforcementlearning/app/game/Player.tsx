@@ -1,5 +1,5 @@
 import { animated, config, useSpring } from '@react-spring/three'
-import { Html, Text3D, useCursor } from '@react-three/drei'
+import { Text3D, useCursor } from '@react-three/drei'
 import { forwardRef, useState } from 'react'
 import Bunny from './Models/Bunny'
 import Heart from './Models/Heart'
