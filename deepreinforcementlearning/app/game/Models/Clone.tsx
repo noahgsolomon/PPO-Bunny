@@ -52,3 +52,5 @@ export const Clone = forwardRef<any, CloneProps>(({ i, movement, ...groupProps }
     </animated.group>
   )
 })
+
+Clone.displayName = 'Clone'
