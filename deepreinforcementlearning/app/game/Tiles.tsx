@@ -153,7 +153,7 @@ export default function Tiles() {
     }
   }
 
-  const move = (direction: 'left' | 'right' | 'up' | 'down', agentIdx: number, oldProb: number, state: State) => {
+  const move = (direction: 'left' | 'right' | 'up' | 'down', agentIdx: number, oldProb: number, state: number[]) => {
     const agent = environment.agentEnvironment[agentIdx]
     const TILE_COUNT = environment.TILE_COUNT
 
@@ -165,7 +165,7 @@ export default function Tiles() {
 
     let newObservation: AgentObservation = {
       agentIdx,
-      state: { tileState: [], normalizedHeartsRemaining: 1, normalizedStepsRemaining: 1 },
+      state: [],
       action: { index: 0, name: 'left' },
       actionOldProbability: oldProb,
       actionNewProbability: 0,
@@ -186,20 +186,20 @@ export default function Tiles() {
           agent.position.x -= 1
           positionX = agent.positionX - 1.1
           rotation = -Math.PI * 0.5
-          if (nextTileType.type.type === 'BOMB' && nextTileType.type.enabled) {
+          if (nextTileType?.type.type === 'BOMB' && nextTileType.type.enabled) {
             agent.setHearts(Math.max(agent.hearts + nextTileType.type.heartGain, 0), agentIdx)
             agent.setCoins(agent.coins + nextTileType.type.coinGain, agentIdx)
             nextTileType.type.enabled = false
             agent.setSteps(agent.steps - 1, agentIdx)
             heartGain = nextTileType.type.heartGain
             coinGain = nextTileType.type.coinGain
-          } else if (nextTileType.type.type === 'HOLOGRAM') {
+          } else if (nextTileType?.type.type === 'HOLOGRAM') {
             agent.setHearts(0, agentIdx)
             agent.setSteps(0, agentIdx)
             agent.setPositionY(-1.4, agentIdx)
             heartGain = nextTileType.type.heartGain
             coinGain = nextTileType.type.coinGain
-          } else if (nextTileType.type.type === 'GUM' || nextTileType.type.type === 'PLUM') {
+          } else if (nextTileType?.type.type === 'GUM' || nextTileType?.type.type === 'PLUM') {
             agent.setSteps(agent.steps - 1, agentIdx)
             agent.setCoins(agent.coins + nextTileType.type.coinGain, agent.index)
 
@@ -248,24 +248,24 @@ export default function Tiles() {
       case 'right':
         nextTileType = agent.tileMap[agent.position.x + 1 + Math.sqrt(TILE_COUNT) * agent.position.y]
 
-        if (agent.position.x + 1 <= Math.sqrt(TILE_COUNT) - 1 && nextTileType.type.type !== 'HOLE') {
+        if (agent.position.x + 1 <= Math.sqrt(TILE_COUNT) - 1 && nextTileType?.type.type !== 'HOLE') {
           agent.position.x += 1
           positionX = agent.positionX + 1.1
           rotation = Math.PI * 0.5
-          if (nextTileType.type.type === 'BOMB' && nextTileType.type.enabled) {
+          if (nextTileType?.type.type === 'BOMB' && nextTileType.type.enabled) {
             agent.setHearts(Math.max(agent.hearts + nextTileType.type.heartGain, 0), agentIdx)
             agent.setCoins(agent.coins + nextTileType.type.coinGain, agentIdx)
             nextTileType.type.enabled = false
             agent.setSteps(agent.steps - 1, agentIdx)
             heartGain = nextTileType.type.heartGain
             coinGain = nextTileType.type.coinGain
-          } else if (nextTileType.type.type === 'HOLOGRAM') {
+          } else if (nextTileType?.type.type === 'HOLOGRAM') {
             agent.setHearts(0, agentIdx)
             agent.setSteps(0, agentIdx)
             agent.setPositionY(-1.4, agentIdx)
             heartGain = nextTileType.type.heartGain
             coinGain = nextTileType.type.coinGain
-          } else if (nextTileType.type.type === 'GUM' || nextTileType.type.type === 'PLUM') {
+          } else if (nextTileType?.type.type === 'GUM' || nextTileType?.type.type === 'PLUM') {
             agent.setSteps(agent.steps - 1, agentIdx)
             agent.setCoins(agent.coins + nextTileType.type.coinGain, agent.index)
 
@@ -313,25 +313,25 @@ export default function Tiles() {
       case 'up':
         nextTileType = agent.tileMap[agent.position.x + Math.sqrt(TILE_COUNT) * (agent.position.y - 1)]
 
-        if (agent.position.y - 1 >= 0 && nextTileType.type.type !== 'HOLE') {
+        if (agent.position.y - 1 >= 0 && nextTileType?.type.type !== 'HOLE') {
           agent.position.y -= 1
           positionZ = agent.positionZ - 1.1
           rotation = Math.PI
 
-          if (nextTileType.type.type === 'BOMB' && nextTileType.type.enabled) {
+          if (nextTileType?.type.type === 'BOMB' && nextTileType.type.enabled) {
             agent.setHearts(Math.max(agent.hearts + nextTileType.type.heartGain, 0), agentIdx)
             agent.setCoins(agent.coins + nextTileType.type.coinGain, agentIdx)
             nextTileType.type.enabled = false
             agent.setSteps(agent.steps - 1, agentIdx)
             heartGain = nextTileType.type.heartGain
             coinGain = nextTileType.type.coinGain
-          } else if (nextTileType.type.type === 'HOLOGRAM') {
+          } else if (nextTileType?.type.type === 'HOLOGRAM') {
             agent.setHearts(0, agentIdx)
             agent.setSteps(0, agentIdx)
             agent.setPositionY(-1.4, agentIdx)
             heartGain = nextTileType.type.heartGain
             coinGain = nextTileType.type.coinGain
-          } else if (nextTileType.type.type === 'GUM' || nextTileType.type.type === 'PLUM') {
+          } else if (nextTileType?.type.type === 'GUM' || nextTileType?.type.type === 'PLUM') {
             agent.setSteps(agent.steps - 1, agentIdx)
             agent.setCoins(agent.coins + nextTileType.type.coinGain, agent.index)
 
@@ -379,25 +379,25 @@ export default function Tiles() {
       case 'down':
         nextTileType = agent.tileMap[agent.position.x + Math.sqrt(TILE_COUNT) * (agent.position.y + 1)]
 
-        if (agent.position.y + 1 <= Math.sqrt(TILE_COUNT) - 1 && nextTileType.type.type !== 'HOLE') {
+        if (agent.position.y + 1 <= Math.sqrt(TILE_COUNT) - 1 && nextTileType?.type.type !== 'HOLE') {
           agent.position.y += 1
           positionZ = agent.positionZ + 1.1
           rotation = 0
 
-          if (nextTileType.type.type === 'BOMB' && nextTileType.type.enabled) {
+          if (nextTileType?.type.type === 'BOMB' && nextTileType.type.enabled) {
             agent.setHearts(Math.max(agent.hearts + nextTileType.type.heartGain, 0), agentIdx)
             agent.setCoins(agent.coins + nextTileType.type.coinGain, agentIdx)
             nextTileType.type.enabled = false
             agent.setSteps(agent.steps - 1, agentIdx)
             heartGain = nextTileType.type.heartGain
             coinGain = nextTileType.type.coinGain
-          } else if (nextTileType.type.type === 'HOLOGRAM') {
+          } else if (nextTileType?.type.type === 'HOLOGRAM') {
             agent.setHearts(0, agentIdx)
             agent.setSteps(0, agentIdx)
             agent.setPositionY(-1.4, agentIdx)
             heartGain = nextTileType.type.heartGain
             coinGain = nextTileType.type.coinGain
-          } else if (nextTileType.type.type === 'GUM' || nextTileType.type.type === 'PLUM') {
+          } else if (nextTileType?.type.type === 'GUM' || nextTileType?.type.type === 'PLUM') {
             agent.setSteps(agent.steps - 1, agentIdx)
             agent.setCoins(agent.coins + nextTileType.type.coinGain, agent.index)
 
@@ -473,9 +473,10 @@ export default function Tiles() {
     }
   }, [agentTiles])
 
+  // DATA COLLECTION INTERVAL
   useEffect(() => {
     const moveAgents = async () => {
-      const startTime = performance.now()
+      // const startTime = performance.now()
       const directions: ('left' | 'right' | 'up' | 'down')[] = ['left', 'right', 'up', 'down']
 
       if (observations.length / OBSERVATION_RESERVOIR >= 1) {
@@ -559,8 +560,6 @@ export default function Tiles() {
         ]
       })
 
-      console.log(input)
-
       const logits = policyNetwork.predict(tf.tensor(input)) as tf.Tensor2D
       const prob = tf.softmax(logits)
       const idx = await tf.multinomial(prob, 1).array()
@@ -570,29 +569,104 @@ export default function Tiles() {
         if (environment.agentEnvironment[i].steps <= 0 || environment.agentEnvironment[i].hearts <= 0) {
           numFinished += 1
         } else {
-          console.log(probArr[i][idx[i][0]])
-          move(directions[idx[i][0]], i, probArr[i][idx[i][0]], states[i])
+          move(directions[idx[i][0]], i, probArr[i][idx[i][0]], input[i])
         }
       }
 
-      if (numFinished > NUM_AGENTS / 2) {
+      if (numFinished >= NUM_AGENTS * 0.75) {
         resetAgentMetrics()
         setMapResetCount((prevCount) => prevCount + 1)
       }
 
-      const endTime = performance.now()
-      const executionTime = endTime - startTime
-      console.log(`moveAgents execution time: ${executionTime} ms`)
+      // const endTime = performance.now()
+      // const executionTime = endTime - startTime
+      // console.log(`moveAgents execution time: ${executionTime} ms`)
     }
 
     if (gameState.state === 'COLLECTION') {
-      const intervalId = setInterval(moveAgents, 500)
+      const intervalId = setInterval(moveAgents, 100)
 
       return () => {
         clearInterval(intervalId)
       }
     }
   }, [environment.agentEnvironment, gameState.state])
+
+  //POLICY & VALUE NETWORK OPTIMIZATION STEP
+  useEffect(() => {
+    if (gameState.state === 'OPTIMIZATION') {
+      const optimize = async () => {
+        const BATCH_SIZE = 32
+        const EPOCHS = 3
+        const EPSILON = 0.2
+
+        const batch = observations.filter((obs) => obs.complete)
+        const numBatches = Math.ceil(batch.length / BATCH_SIZE)
+
+        for (let epoch = 0; epoch < EPOCHS; epoch++) {
+          for (let i = 0; i < numBatches; i++) {
+            const startIdx = i * BATCH_SIZE
+            const endIdx = Math.min((i + 1) * BATCH_SIZE, batch.length)
+            const miniBatch = batch.slice(startIdx, endIdx)
+
+            const state = miniBatch.map((b) => b.state) as number[][]
+            const discountedSumOfRewards = miniBatch.map((e) => e.reward)
+            const actions = miniBatch.map((b) => b.action.index)
+            const oldProb = miniBatch.map((b) => b.actionOldProbability)
+
+            const xs = tf.tensor(state)
+            const ys = tf.tensor(discountedSumOfRewards)
+
+            valueNetwork.compile({ optimizer: 'adam', loss: 'meanSquaredError' })
+
+            // Train the value network
+            const valueHistory = await valueNetwork.fit(xs, ys, {
+              batchSize: miniBatch.length,
+              epochs: 1,
+              shuffle: false,
+            })
+
+            console.log(`Value network loss (epoch ${epoch + 1}, batch ${i + 1}):`, valueHistory.history.loss)
+
+            // Calculate the advantage
+            const valueOutput = valueNetwork.predict(xs) as tf.Tensor2D
+            const advantage = ys.sub(valueOutput).square()
+
+            policyNetwork.compile({ optimizer: 'adam', loss: ppoLoss })
+
+            // Train the policy network
+            const policyHistory = await policyNetwork.fit(xs, tf.ones([xs.shape[0], 4]), {
+              batchSize: miniBatch.length,
+              epochs: 1,
+              shuffle: false,
+            })
+
+            console.log(`Policy network loss (epoch ${epoch + 1}, batch ${i + 1}):`, policyHistory.history.loss)
+
+            // Custom loss function for PPO
+            function ppoLoss(yTrue, yPred) {
+              const actionsInt32 = tf.cast(actions, 'int32')
+              const prob = (tf.softmax(yPred) as tf.Tensor2D).gather(actionsInt32, 1)
+              const oldProbTensor = tf.tensor(oldProb)
+              const ratio = prob.div(oldProbTensor.add(1e-10))
+              const clippedRatio = ratio.clipByValue(1 - EPSILON, 1 + EPSILON)
+              const loss = tf.minimum(ratio.mul(advantage), clippedRatio.mul(advantage)).neg()
+              return loss.mean()
+            }
+            // Cleanup tensors
+            xs.dispose()
+            ys.dispose()
+            valueOutput.dispose()
+            advantage.dispose()
+          }
+        }
+        setObservations([])
+        gameState.setState('COLLECTION')
+      }
+
+      optimize()
+    }
+  }, [gameState.state, observations])
 
   return (
     <>
@@ -680,39 +754,6 @@ export default function Tiles() {
         fadeStrength={1}
         infiniteGrid
       />
-      {/* <Html scale={0.5} position-z={8}>
-        <Button
-          onClick={() => move('left', 1)}
-          variant='none'
-          className='z-10 absolute right-1/2 bottom-10 transform -translate-y-1/2'
-        >
-          <ArrowLeft className='w-10 h-10' />
-        </Button>
-
-        <Button
-          onClick={() => move('right', 1)}
-          variant='none'
-          className='z-10 absolute left-1/2 bottom-10 transform -translate-y-1/2'
-        >
-          <ArrowRight className='w-10 h-10' />
-        </Button>
-
-        <Button
-          onClick={() => move('up', 1)}
-          variant='none'
-          className='z-10 absolute left-1/2 bottom-24 transform -translate-x-1/2'
-        >
-          <ArrowUp className='w-10 h-10' />
-        </Button>
-
-        <Button
-          onClick={() => move('down', 1)}
-          variant='none'
-          className='z-10 absolute left-1/2 bottom-6 transform -translate-x-1/2'
-        >
-          <ArrowDown className='w-10 h-10' />
-        </Button>
-      </Html> */}
     </>
   )
 }
