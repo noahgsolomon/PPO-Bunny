@@ -1,9 +1,9 @@
-export const DefaultTile = { heartGain: 0, coinGain: 0, stepGain: -1, type: 'DEFAULT' }
-export const BombTile = { heartGain: -2, coinGain: -3, stepGain: -1, type: 'BOMB', enabled: true }
-export const HologramTile = { heartGain: -3, coinGain: 0, stepGain: -1, type: 'HOLOGRAM' }
-export const GumTile = { heartGain: 0, coinGain: 3, stepGain: -1, type: 'GUM' }
-export const PlumTile = { heartGain: 0, coinGain: 1, stepGain: -1, type: 'PLUM' }
-export const HoleTile = { heartGain: 0, coinGain: 0, stepGain: 0, type: 'HOLE' }
+export const DefaultTile = { heartGain: 0, coinGain: 0, stepGain: -1, type: 'DEFAULT', index: 1 }
+export const BombTile = { heartGain: -2, coinGain: -3, stepGain: -1, type: 'BOMB', enabled: true, index: -1 }
+export const HologramTile = { heartGain: -3, coinGain: 0, stepGain: -1, type: 'HOLOGRAM', index: -2 }
+export const GumTile = { heartGain: 0, coinGain: 3, stepGain: -1, type: 'GUM', index: 3 }
+export const PlumTile = { heartGain: 0, coinGain: 1, stepGain: -1, type: 'PLUM', index: 2 }
+export const HoleTile = { heartGain: 0, coinGain: 0, stepGain: 0, type: 'HOLE', index: 0 }
 export const CloneTile = { heartGain: 0, coinGain: 0, stepGain: 0, type: 'CLONE' }
 
 export type TileType = DefaultTile | BombTile | HologramTile | GumTile | PlumTile
@@ -42,14 +42,14 @@ export type EnvironmentState = {
   TILE_COUNT: number
 }
 
-export type TileState = {
-  heartGain: number
-  coinGain: number
-  stepGain: number
-  // the 3 above should all be multiplied by some distance significance factor of (vision_length/(vision_length-1+distance))
-  dirX: number
-  dirY: number
-}
+export type TileState = number | number[]
+
+// export type TileState = {
+//   heartGain: number
+//   coinGain: number
+//   stepGain: number
+//   // the 3 above should all be multiplied by some distance significance factor of (vision_length/(vision_length-1+distance))
+// }
 
 export type State = {
   tileState: TileState[]
