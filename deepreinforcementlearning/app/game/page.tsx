@@ -5,11 +5,11 @@ import { Button } from '@/components/ui/button'
 import { config } from '@react-spring/three'
 import { animated, useSpring, config as webConfig } from '@react-spring/web'
 import { PerspectiveCamera, PresentationControls } from '@react-three/drei'
-import { Info, Loader2, Trophy } from 'lucide-react'
+import { ArrowLeft, ArrowRight, Info, Loader2, Trophy } from 'lucide-react'
 import dynamic from 'next/dynamic'
 import Image from 'next/image'
 import Lights from './Lights'
-import Tiles from './Tiles'
+import Tiles, { NUM_AGENTS } from './Tiles'
 import useEnvironment from './store/useEnvironment'
 import useGameState from './store/useGameState'
 
@@ -49,19 +49,19 @@ export default function Page() {
 
   const initialAnimation = useSpring({
     opacity: gameState.state === 'INITIAL' ? 1 : 0,
-    transform: gameState.state === 'INITIAL' ? 'translateY(0)' : 'translateY(-200%)',
+    transform: gameState.state === 'INITIAL' ? 'translateY(0)' : 'translateY(100%)',
     config: webConfig.wobbly,
   })
 
   const playingAnimation = useSpring({
     opacity: gameState.state === 'COLLECTION' ? 1 : 0,
-    transform: gameState.state === 'COLLECTION' ? 'translateY(0)' : 'translateY(200%)',
+    transform: gameState.state === 'COLLECTION' ? 'translateY(0)' : 'translateY(-200%)',
     config: webConfig.wobbly,
   })
 
   const optimizationAnimation = useSpring({
     opacity: gameState.state === 'OPTIMIZATION' ? 1 : 0,
-    transform: gameState.state === 'OPTIMIZATION' ? 'translateY(0)' : 'translateY(200%)',
+    transform: gameState.state === 'OPTIMIZATION' ? 'translateY(0)' : 'translateY(-200%)',
     config: webConfig.wobbly,
   })
 
@@ -109,30 +109,6 @@ export default function Page() {
       </Button> */}
       <animated.div
         style={playingAnimation}
-        className='hidden absolute w-full z-10 left-16 top-12 md:flex flex-row gap-2 items-center'
-      >
-        <Avatar
-          style={{ borderColor: colors[environment.currentAgentIdx] ?? '#ffffff' }}
-          className={`border-[5px] outline-2 size-16`}
-        >
-          <AvatarImage src='/bunnypfp.png' />
-        </Avatar>
-        <div className='flex flex-col gap-2'>
-          <div className='flex flex-row gap-2 items-center'>
-            <Image unoptimized src={'/coin.webp'} alt='coin' width={24} height={24} />{' '}
-            <span className='text-yellow-500 font-bold text-2xl'>
-              {environment.agentEnvironment[environment.currentAgentIdx].coins}
-            </span>
-          </div>
-          <div className='flex flex-row'>
-            {[...Array(environment.agentEnvironment[environment.currentAgentIdx].hearts)].map((_, i) => (
-              <Image key={i} width={24} height={24} alt='heart' src={'/legoheart.png'} />
-            ))}
-          </div>
-        </div>
-      </animated.div>
-      <animated.div
-        style={playingAnimation}
         className='z-10 absolute top-16 text-center w-full flex items-center flex-col gap-4'
       >
         <h1 className=' font-bold italic text-4xl'>
@@ -150,6 +126,47 @@ export default function Page() {
         </h1>
         <Loader2 className='size-4 animate-spin' />
       </animated.div>
+      <div className={'bottom-16 z-10 absolute text-center w-full flex justify-center flex-row gap-4'}>
+        <Button
+          disabled={environment.currentAgentIdx === 0}
+          onClick={() => environment.setCurrentAgentIdx(environment.currentAgentIdx - 1)}
+          variant='none'
+        >
+          <ArrowLeft className='size-8' />
+        </Button>
+        <animated.div className={'flex flex-col gap-2 items-center'}>
+          <div className={'flex items-center gap-4'}>
+            <Avatar
+              style={{ borderColor: colors[environment.currentAgentIdx] ?? '#ffffff' }}
+              className={`border-[5px] outline-2 size-16`}
+            >
+              <AvatarImage src='/bunnypfp.png' />
+            </Avatar>
+            <div className='flex flex-col gap-2'>
+              <div className='flex flex-row gap-2 items-center'>
+                <Image unoptimized src={'/coin.webp'} alt='coin' width={24} height={24} />{' '}
+                <span className='text-yellow-500 font-bold text-2xl'>
+                  {environment.agentEnvironment[environment.currentAgentIdx].coins}
+                </span>
+              </div>
+              <div className='flex flex-row'>
+                {[...Array(environment.agentEnvironment[environment.currentAgentIdx].hearts)].map((_, i) => (
+                  <Image key={i} width={24} height={24} alt='heart' src={'/legoheart.png'} />
+                ))}
+              </div>
+            </div>
+          </div>
+          <h1 className='font-bold text-2xl'>AGENT_{environment.currentAgentIdx}</h1>
+        </animated.div>
+
+        <Button
+          disabled={environment.currentAgentIdx >= NUM_AGENTS - 1}
+          onClick={() => environment.setCurrentAgentIdx(environment.currentAgentIdx + 1)}
+          variant='none'
+        >
+          <ArrowRight className='size-8' />
+        </Button>
+      </div>
     </div>
   )
 }
