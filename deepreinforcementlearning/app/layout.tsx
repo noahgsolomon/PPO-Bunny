@@ -1,5 +1,9 @@
 import { Layout } from '@/components/dom/Layout'
 import '@/globals.css'
+import localFont from 'next/font/local'
+import { cn } from './lib/utils'
+
+const krypton = localFont({ src: '../public/krypton.otf' })
 
 export const metadata = {
   title: 'Next.js + Three.js',
@@ -8,7 +12,7 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang='en' className='antialiased' suppressHydrationWarning>
+    <html lang='en' className={cn('antialiased', krypton.className)} suppressHydrationWarning>
       {/*
         <head /> will contain the components returned by the nearest parent
         head.tsx. Find out more at https://beta.nextjs.org/docs/api-reference/file-conventions/head
