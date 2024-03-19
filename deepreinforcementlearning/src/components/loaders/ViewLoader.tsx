@@ -1,9 +1,9 @@
-import { Loader, Loader2 } from 'lucide-react'
+import { Loader2 } from 'lucide-react'
 
 export default function ViewLoader() {
   return (
-    <div className='flex h-96 w-full flex-col items-center justify-center'>
-      <Loader className='w-4 h-4 animate-spin' />
+    <div className='flex w-full flex-col h-screen items-center justify-center'>
+      <Loader2 className='w-6 h-6 text-primary/70 animate-spin' />
     </div>
   )
 }
