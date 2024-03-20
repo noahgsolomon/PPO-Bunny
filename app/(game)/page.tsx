@@ -118,7 +118,7 @@ export default function Page() {
         style={initialAnimation}
         className='z-10 absolute top-16 text-center w-full flex items-center flex-col gap-4'
       >
-        <h1 className='text-4xl font-bold italic'>BUNNY BONANZA</h1>
+        <h1 className='text-4xl font-bold italic'>PPO Bunny</h1>
         <div className='flex flex-row gap-2'>
           <Button className='flex flex-row gap-2 ' onClick={() => gameState.setState('COLLECTION')} size='lg'>
             Train <Trophy className='size-4' />
@@ -133,7 +133,7 @@ export default function Page() {
               <DialogHeader>
                 <DialogTitle>INFO</DialogTitle>
                 <DialogDescription className='text-primary/70'>
-                  Bunny Bonanza is a PPO simulation where bunnies learn to navigate a complex environment in order to
+                  PPO Bunny is a PPO simulation where bunnies learn to navigate a complex environment in order to
                   retrieve the most optimal reward from a trajectory of n steps.
                 </DialogDescription>
               </DialogHeader>
