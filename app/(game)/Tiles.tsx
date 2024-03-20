@@ -28,7 +28,6 @@ import { GlassBucket } from './Models/GlassBucket'
 import useGameState from './store/useGameState'
 import * as tf from '@tensorflow/tfjs'
 import '@tensorflow/tfjs-backend-webgl'
-import RadarField from './RadarField'
 import { toast } from 'sonner'
 
 export const NUM_AGENTS = 10
@@ -744,16 +743,12 @@ export default function Tiles() {
                           position-y={environment.agentEnvironment[environment.currentAgentIdx].positionY}
                           ref={player}
                         />
-                        {/* <RadarField
-                          position-x={movement[environment.currentAgentIdx].positionX}
-                          position-z={movement[environment.currentAgentIdx].positionZ}
-                          viewDistance={VISION_LENGTH * 2 + 1}
-                        /> */}
                       </>
                     ) : (
                       <Clone movement={movement} i={i} />
                     )
                   ) : null}
+                  {/*@ts-ignore */}
                   <RoundedBox castShadow receiveShadow args={[1, tileType === 'BOMB' ? 2.1 : 0.1, 1]}>
                     {tileType !== 'HOLOGRAM' ? (
                       <meshStandardMaterial
@@ -786,7 +781,9 @@ export default function Tiles() {
           )
         })}
       </Center>
+      {/*@ts-ignore */}
       <animated.mesh position-y={baseSpring.positionY} rotation-x={Math.PI * 0.5}>
+        {/*@ts-ignore */}
         <RoundedBox receiveShadow args={[30, 30]}>
           <meshStandardMaterial color={'#212336'} />
         </RoundedBox>
