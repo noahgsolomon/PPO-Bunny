@@ -1,9 +1,9 @@
-export const DefaultTile = { heartGain: 0, coinGain: 0, stepGain: -1, type: 'DEFAULT', index: 1 }
-export const BombTile = { heartGain: -2, coinGain: -3, stepGain: -1, type: 'BOMB', enabled: true, index: -1 }
-export const HologramTile = { heartGain: -3, coinGain: 0, stepGain: -1, type: 'HOLOGRAM', index: -2 }
+export const DefaultTile = { heartGain: 0, coinGain: 0.2, stepGain: -1, type: 'DEFAULT', index: 0 }
+export const BombTile = { heartGain: -2, coinGain: -3, stepGain: -1, type: 'BOMB', enabled: true, index: 1 }
+export const HologramTile = { heartGain: -3, coinGain: 0, stepGain: -1, type: 'HOLOGRAM', index: 2 }
 export const GumTile = { heartGain: 0, coinGain: 3, stepGain: -1, type: 'GUM', index: 3 }
-export const PlumTile = { heartGain: 0, coinGain: 1, stepGain: -1, type: 'PLUM', index: 2 }
-export const HoleTile = { heartGain: 0, coinGain: 0, stepGain: 0, type: 'HOLE', index: 0 }
+export const PlumTile = { heartGain: 0, coinGain: 1, stepGain: -1, type: 'PLUM', index: 4 }
+export const HoleTile = { heartGain: 0, coinGain: 0, stepGain: 0, type: 'HOLE', index: 5 }
 export const CloneTile = { heartGain: 0, coinGain: 0, stepGain: 0, type: 'CLONE' }
 
 export type TileType = DefaultTile | BombTile | HologramTile | GumTile | PlumTile
@@ -53,8 +53,6 @@ export type TileState = number | number[]
 
 export type State = {
   tileState: TileState[]
-  normalizedHeartsRemaining: number
-  normalizedStepsRemaining: number
 }
 
 export type Action = {
@@ -64,7 +62,7 @@ export type Action = {
 
 export type AgentObservation = {
   agentIdx: number
-  state: State | number[]
+  state: number[][]
   action: Action
   actionOldProbability: number
   actionNewProbability: number
