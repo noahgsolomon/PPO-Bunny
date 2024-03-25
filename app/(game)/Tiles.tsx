@@ -630,7 +630,7 @@ export default function Tiles() {
       resetAgentMetrics()
       setMapResetCount((prevCount) => prevCount + 1)
       await new Promise((resolve) => setTimeout(resolve, 1000))
-      const BATCH_SIZE = 32
+      const BATCH_SIZE = 16
       const EPOCHS = 3
       const EPSILON = 0.1
 
@@ -660,8 +660,8 @@ export default function Tiles() {
           // Train the value network
           const valueHistory = await valueNetwork.fit(xs, ys, {
             batchSize: miniBatch.length,
-            epochs: 1,
-            shuffle: false,
+            epochs: 3,
+            shuffle: true,
           })
 
           totalValueLoss += valueHistory.history.loss[0] as number
@@ -675,7 +675,7 @@ export default function Tiles() {
           // Train the policy network
           const policyHistory = await policyNetwork.fit(xs, tf.ones([xs.shape[0], 4]), {
             batchSize: miniBatch.length,
-            epochs: 1,
+            epochs: 3,
             shuffle: false,
           })
 
@@ -683,13 +683,20 @@ export default function Tiles() {
 
           // Custom loss function for PPO
           function ppoLoss(yTrue, yPred) {
-            const actionsInt32 = tf.cast(actions, 'int32')
-            const prob = (tf.softmax(yPred) as tf.Tensor2D).gather(actionsInt32, 1)
-            const oldProbTensor = tf.tensor(oldProb)
-            const ratio = prob.div(oldProbTensor.add(1e-10))
-            const clippedRatio = ratio.clipByValue(1 - EPSILON, 1 + EPSILON)
-            const loss = tf.minimum(ratio.mul(advantage), clippedRatio.mul(advantage)).neg()
-            return loss.mean()
+            return tf.tidy(() => {
+              const actionsInt32 = tf.cast(actions, 'int32')
+              const prob = (tf.softmax(yPred) as tf.Tensor2D).gather(actionsInt32, 1)
+              const oldProbTensor = tf.tensor(oldProb)
+              const ratio = prob.div(oldProbTensor.add(1e-10))
+              const clippedRatio = ratio.clipByValue(1 - EPSILON, 1 + EPSILON)
+              const loss = tf.minimum(ratio.mul(advantage), clippedRatio.mul(advantage)).neg()
+              const entropy = -tf.sum(prob.mul(prob.log()), 1)
+              const entropyLoss = tf.mean(entropy)
+
+              // Add entropy to the loss (encourage exploration)
+              const totalLoss = loss.mean()
+              return totalLoss
+            })
           }
 
           // Cleanup tensors
