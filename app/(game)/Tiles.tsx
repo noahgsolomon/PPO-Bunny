@@ -110,17 +110,22 @@ export default function Tiles() {
         const { tile } = generateTiles(i, agentTiles)
         acc.push({
           type:
-            tile === 'HOLE'
-              ? HoleTile
-              : tile === 'HOLOGRAM'
-                ? HologramTile
-                : tile === 'BOMB'
-                  ? structuredClone(BombTile)
-                  : tile === 'GUM'
-                    ? GumTile
-                    : tile === 'PLUM'
-                      ? PlumTile
-                      : DefaultTile,
+            i % Math.sqrt(TILE_COUNT) < VISION_LENGTH ||
+            Math.floor(i / Math.sqrt(TILE_COUNT)) < VISION_LENGTH ||
+            i % Math.sqrt(TILE_COUNT) >= Math.sqrt(TILE_COUNT) - VISION_LENGTH ||
+            Math.floor(i / Math.sqrt(TILE_COUNT)) >= Math.sqrt(TILE_COUNT) - VISION_LENGTH
+              ? HologramTile
+              : tile === 'HOLE'
+                ? HoleTile
+                : tile === 'HOLOGRAM'
+                  ? HologramTile
+                  : tile === 'BOMB'
+                    ? structuredClone(BombTile)
+                    : tile === 'GUM'
+                      ? GumTile
+                      : tile === 'PLUM'
+                        ? PlumTile
+                        : DefaultTile,
           position: { x: i % Math.sqrt(TILE_COUNT), y: Math.floor(i / Math.sqrt(TILE_COUNT)) },
         })
         return acc
@@ -853,17 +858,9 @@ const generateTiles = (i: number, agentTiles: number[]) => {
   const hole = Math.random() < 0.2
 
   const tile =
-    !agentTiles.includes(i) && hole
-      ? 'HOLE'
-      : hologram
-        ? 'HOLOGRAM'
-        : deathTile
-          ? 'BOMB'
-          : gum
-            ? 'GUM'
-            : plum
-              ? 'PLUM'
-              : 'DEFAULT'
+    // !agentTiles.includes(i) && hole
+    //   ? 'HOLE' :
+    hologram ? 'HOLOGRAM' : deathTile ? 'BOMB' : gum ? 'GUM' : plum ? 'PLUM' : 'DEFAULT'
 
   return {
     tile,
