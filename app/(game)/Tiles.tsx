@@ -96,7 +96,13 @@ export default function Tiles() {
     const randTiles = []
     for (let i = 0; i < NUM_AGENTS; i++) {
       let rand = Math.round(Math.random() * TILE_COUNT - 1)
-      while (randTiles.includes(rand)) {
+      while (
+        randTiles.includes(rand) ||
+        rand % Math.sqrt(TILE_COUNT) < VISION_LENGTH ||
+        Math.floor(rand / Math.sqrt(TILE_COUNT)) < VISION_LENGTH ||
+        rand % Math.sqrt(TILE_COUNT) >= Math.sqrt(TILE_COUNT) - VISION_LENGTH ||
+        Math.floor(rand / Math.sqrt(TILE_COUNT)) >= Math.sqrt(TILE_COUNT) - VISION_LENGTH
+      ) {
         rand = Math.round(Math.random() * TILE_COUNT - 1)
       }
       randTiles.push(rand)
