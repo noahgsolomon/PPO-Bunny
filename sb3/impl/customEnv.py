@@ -19,4 +19,7 @@ class BunnyEnv(gym.Env):
         # hearts (min, max): [0, 1]
         # coins (min, max): [-3, 3]
         # observation shape: [batch, 5x5, 2]
-        self.observation_space = spaces.Box(low=np.array([[0, -3]] * 25), high=np.array([[1, 3]] * 25), dtype=np.int32)
+        self.observation_space = spaces.Box(low=np.array([[0, -3]] * 25), high=np.array([[1, 3]] * 25), dtype=np.float32)
+
+    def step(self, action):
+        return
