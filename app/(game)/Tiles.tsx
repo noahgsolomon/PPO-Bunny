@@ -30,6 +30,8 @@ import * as tf from '@tensorflow/tfjs'
 import '@tensorflow/tfjs-backend-webgl'
 import { toast } from 'sonner'
 
+// SAVE POINT
+
 export const NUM_AGENTS = 10
 
 export default function Tiles() {
