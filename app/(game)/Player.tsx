@@ -22,7 +22,7 @@ export const Player = forwardRef<any, any>((props, ref) => {
 
   return (
     <animated.group ref={ref} {...props}>
-      <animated.group position-y={positionY} scale={scale}>
+      {/* <animated.group position-y={positionY} scale={scale}>
         {[...Array(environment.agentEnvironment[environment.currentAgentIdx].hearts)].map((_, i) => (
           <Heart key={i} position-y={0.8} position-x={-0.4 + 0.4 * i} />
         ))}
@@ -31,7 +31,7 @@ export const Player = forwardRef<any, any>((props, ref) => {
             {environment.agentEnvironment[environment.currentAgentIdx].steps}
           </Text3D>
         )}
-      </animated.group>
+      </animated.group> */}
       <animated.group
         rotation-y={rotation}
         onPointerEnter={(e) => {

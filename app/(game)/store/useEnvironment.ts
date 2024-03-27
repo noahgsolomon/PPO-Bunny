@@ -4,19 +4,21 @@ import { EnvironmentState, Position, TileType } from '@/index.d'
 const NUM_AGENTS = 10
 
 const useEnvironment = create<EnvironmentState>()((set) => ({
-  TILE_COUNT: 225,
+  TILE_COUNT: 100,
+  targetPosition: { x: 0, y: 0 },
+  setTargetPosition: (targetPosition: { x: number; y: number }) => set((state) => ({ ...state, targetPosition })),
   agentEnvironment: [...Array(NUM_AGENTS)].map((_, i) => ({
     position: { x: 0, y: 0 },
     tileMap: [],
-    steps: 50,
+    steps: 100,
     coins: 0,
     index: i,
     startingTile: 0,
-    hearts: 3,
     positionX: 0,
     positionZ: 0,
     positionY: 0.5,
     rotation: 0,
+    finished: false,
     setPositionY: (positionY: number, i: number) =>
       set((state) => ({
         agentEnvironment: state.agentEnvironment.map((agent, idx) => (idx === i ? { ...agent, positionY } : agent)),
@@ -37,9 +39,13 @@ const useEnvironment = create<EnvironmentState>()((set) => ({
       set((state) => ({
         agentEnvironment: state.agentEnvironment.map((agent, idx) => (idx === i ? { ...agent, rotation } : agent)),
       })),
-    setHearts: (hearts: number, i: number) =>
+    setFinished: (finished: boolean, i: number) =>
       set((state) => ({
-        agentEnvironment: state.agentEnvironment.map((agent, idx) => (idx === i ? { ...agent, hearts } : agent)),
+        agentEnvironment: state.agentEnvironment.map((agent, idx) => (idx === i ? { ...agent, finished } : agent)),
+      })),
+    setSteps: (steps: number, i: number) =>
+      set((state) => ({
+        agentEnvironment: state.agentEnvironment.map((agent, idx) => (idx === i ? { ...agent, steps } : agent)),
       })),
     setPosition: (position: Position, i: number) =>
       set((state) => ({
