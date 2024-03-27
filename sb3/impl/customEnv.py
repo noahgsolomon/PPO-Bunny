@@ -13,9 +13,7 @@ class BunnyEnv(gym.Env):
     UP = 2
     DOWN = 3
 
-    TILE_COUNT = 225 # 15**2
-    TOTAL_HEARTS = 3
-    VISION_LENGTH = 2
+    GRID_SIZE = (15, 15)
 
 
     def __init__(self):
@@ -49,4 +47,4 @@ class BunnyEnv(gym.Env):
     #
 
     def generateTileMap(self) -> List[List[int]]:
-        return [[0]]
+        return
