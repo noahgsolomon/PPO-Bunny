@@ -7,10 +7,8 @@ import { Player } from './Player'
 import { Fragment, useEffect, useMemo, useRef, useState } from 'react'
 import { Group } from 'three'
 import { Clone } from './Models/Clone'
-import Bomb from './Models/Bomb'
 import HologramMaterial from './HologramMaterial'
 import Gum from './Models/Gum'
-import Plum from './Models/Plum'
 import useEnvironment from './store/useEnvironment'
 import { Position, TileType, DefaultTile, GumTile, HologramTile, State } from '@/index.d'
 
@@ -20,10 +18,6 @@ import useGameState from './store/useGameState'
 import { createModelCpu, runModel, warmupModel } from './runModel'
 import { InferenceSession } from 'onnxruntime-web/wasm'
 
-// env.wasm.wasmPaths = 1
-
-// SAVE POINT
-
 export const NUM_AGENTS = 10
 
 export default function Tiles() {
@@ -31,6 +25,7 @@ export default function Tiles() {
 
   useEffect(() => {
     const loadModels = async () => {
+      gameState.setState('LOADING_MODEL')
       try {
         const modelFile = await fetch('/model/model.onnx')
         const modelBuffer = await modelFile.arrayBuffer()
@@ -38,9 +33,7 @@ export default function Tiles() {
         warmupModel(policyNetwork)
         console.log('Model loaded successfully')
         setPolicyNetwork(policyNetwork)
-        if (gameState.state === 'LOADING') {
-          gameState.setState('INITIAL')
-        }
+        gameState.setState('INITIAL')
       } catch (error) {
         console.error('Error loading the model:', error)
       }

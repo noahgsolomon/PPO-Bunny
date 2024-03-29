@@ -71,6 +71,12 @@ export default function Page() {
     config: webConfig.default,
   })
 
+  const loadingModelAnimation = useSpring({
+    opacity: gameState.state === 'LOADING_MODEL' ? 1 : 0,
+    transform: gameState.state === 'LOADING_MODEL' ? 'translateY(0)' : 'translateY(-100%)',
+    config: webConfig.default,
+  })
+
   const playingAnimation = useSpring({
     opacity: gameState.state === 'RUNNING' ? 1 : 0,
     transform: gameState.state === 'RUNNING' ? 'translateY(0)' : 'translateY(-200%)',
@@ -110,9 +116,18 @@ export default function Page() {
 
       {gameState.state === 'LOADING' && (
         <div className='absolute inset-0 flex justify-center items-center'>
-          <Loader2 className='size-6 animate-spin text-primary/70' />
+          <p className='flex flex-row items-center gap-2'>
+            Loading <Rabbit className='size-4' />
+          </p>
         </div>
       )}
+
+      <animated.div
+        style={loadingModelAnimation}
+        className='z-10 absolute top-16 text-center w-full flex items-center flex-col gap-4'
+      >
+        <p>Loading Policy Network</p>
+      </animated.div>
 
       <animated.div
         style={initialAnimation}
@@ -135,8 +150,8 @@ export default function Page() {
                   <DialogHeader>
                     <DialogTitle>INFO</DialogTitle>
                     <DialogDescription className='text-primary/70'>
-                      PPO Bunny is a PPO simulation where bunnies learn to navigate a complex environment in order to
-                      retrieve the most optimal reward from a trajectory of n steps.
+                      PPO Bunny is a PPO simulation where bunnies navigate complex environments in order to retrieve the
+                      most optimal reward.
                     </DialogDescription>
                   </DialogHeader>
                   <Image
@@ -146,16 +161,6 @@ export default function Page() {
                     className='rounded-lg border mx-auto'
                     alt='bunny'
                   />
-                  <div>
-                    <h2 className='font-bold'>The future of ai??</h2>
-                    <p className='text-primary/70'>
-                      The aim of this project is to serve as a proof of concept. That the training procedure can take
-                      place on customers devices. This has incredible security implications, especially considering when
-                      networks need to be trained on customer data but the company is not allowed to store that data. By
-                      loading and training on the customers device, there is no need to store this data. Instead, it is
-                      immediately baked into the network(s).
-                    </p>
-                  </div>
                   <div>
                     <h2>How do the bunnies even learn?</h2>
                     <p className={'text-primary/70'}>
