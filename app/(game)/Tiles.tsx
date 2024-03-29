@@ -43,9 +43,7 @@ export default function Tiles() {
   useEffect(() => {
     const loadModels = async () => {
       try {
-        const modelFile = await fetch(
-          'https://raw.githubusercontent.com/noahgsolomon/bunnymodel/main/policy/model.onnx',
-        )
+        const modelFile = await fetch('/model/model.onnx')
         const modelBuffer = await modelFile.arrayBuffer()
         const policyNetwork = await createModelCpu(modelBuffer)
         warmupModel(policyNetwork)
