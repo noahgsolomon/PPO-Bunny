@@ -20,6 +20,8 @@ import useGameState from './store/useGameState'
 import { createModelCpu, runModel, warmupModel } from './runModel'
 import { InferenceSession } from 'onnxruntime-web/wasm'
 
+// env.wasm.wasmPaths = 1
+
 // SAVE POINT
 
 export const NUM_AGENTS = 10

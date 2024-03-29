@@ -3,6 +3,11 @@ import { InferenceSession, Tensor } from 'onnxruntime-web'
 import * as ort from 'onnxruntime-web'
 
 ort.InferenceSession
+ort.env.wasm.numThreads = 1
+ort.env.wasm.wasmPaths = {
+  'ort-wasm-simd.wasm': '/model/ort-wasm-simd.wasm',
+  'ort-wasm.wasm': '/model/ort-wasm.wasm',
+}
 
 export async function createModelGpu(model: ArrayBuffer): Promise<InferenceSession> {
   return await InferenceSession.create(model, { executionProviders: ['webgl'] })
