@@ -48,7 +48,7 @@ export default function Tiles() {
   }, [])
 
   const AnimatedGrid = animated(Grid)
-  const TILE_COUNT = 225
+  const TILE_COUNT = 625
 
   const [springs, _] = useSprings(TILE_COUNT, (i) => {
     const row = Math.floor(i / Math.sqrt(TILE_COUNT))
@@ -327,7 +327,11 @@ export default function Tiles() {
   }, [agentTiles])
 
   useEffect(() => {
+    let intervalId
+
     const moveAgents = async () => {
+      console.log('hi')
+
       const directions: ('left' | 'right' | 'up' | 'down')[] = ['left', 'up', 'right', 'down']
 
       let numFinished = 0
@@ -369,10 +373,9 @@ export default function Tiles() {
       if (numFinished >= NUM_AGENTS * 0.8) {
         resetAgentMetrics()
         setMapResetCount((prevCount) => prevCount + 1)
+        gameState.setState('CHANGING')
       }
     }
-
-    let intervalId
 
     if (gameState.state === 'RUNNING') {
       intervalId = setInterval(moveAgents, 100)
@@ -382,6 +385,21 @@ export default function Tiles() {
       clearInterval(intervalId)
     }
   }, [environment.agentEnvironment, gameState.state])
+
+  useEffect(() => {
+    if (gameState.state === 'CHANGING') {
+      const startGame = () => {
+        gameState.setChangingText('READY?')
+        setTimeout(() => {
+          gameState.setChangingText('GO!')
+          setTimeout(() => {
+            gameState.setState('RUNNING')
+          }, 750)
+        }, 750)
+      }
+      startGame()
+    }
+  }, [gameState.state])
 
   return (
     <>

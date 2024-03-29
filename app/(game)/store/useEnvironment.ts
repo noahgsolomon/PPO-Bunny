@@ -4,7 +4,7 @@ import { EnvironmentState, Position, TileType } from '@/index.d'
 const NUM_AGENTS = 10
 
 const useEnvironment = create<EnvironmentState>()((set) => ({
-  TILE_COUNT: 225,
+  TILE_COUNT: 625,
   targetPosition: { x: 0, y: 0 },
   setTargetPosition: (targetPosition: { x: number; y: number }) => set((state) => ({ ...state, targetPosition })),
   agentEnvironment: [...Array(NUM_AGENTS)].map((_, i) => ({
