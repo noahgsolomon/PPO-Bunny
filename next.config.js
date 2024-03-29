@@ -1,6 +1,8 @@
 const withBundleAnalyzer = require('@next/bundle-analyzer')({
   enabled: process.env.ANALYZE === 'true',
 })
+const NodePolyfillPlugin = require('node-polyfill-webpack-plugin')
+const CopyPlugin = require('copy-webpack-plugin')
 
 /**
  * A fork of 'next-pwa' that has app directory support
@@ -23,6 +25,25 @@ const nextConfig = {
       // We're in the browser build, so we can safely exclude the sharp module
       config.externals.push('sharp')
     }
+    config.plugins.push(
+      new NodePolyfillPlugin(),
+      new CopyPlugin({
+        patterns: [
+          {
+            from: './node_modules/onnxruntime-web/dist/ort-wasm.wasm',
+            to: 'static/chunks/app/(game)',
+          },
+          {
+            from: './node_modules/onnxruntime-web/dist/ort-wasm-simd.wasm',
+            to: 'static/chunks/app/(game)',
+          },
+          {
+            from: './model',
+            to: 'static/chunks/app/(game)',
+          },
+        ],
+      }),
+    )
     // audio support
     config.module.rules.push({
       test: /\.(ogg|mp3|wav|mpe?g)$/i,

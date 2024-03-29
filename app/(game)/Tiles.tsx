@@ -47,8 +47,10 @@ export default function Tiles() {
         const modelFile = await fetch(
           'https://raw.githubusercontent.com/noahgsolomon/bunnymodel/main/policy/model.onnx',
         )
+        console.log('herdde')
         const modelBuffer = await modelFile.arrayBuffer()
-        const policyNetwork = await createModelGpu(modelBuffer)
+        console.log('hedddddddre')
+        const policyNetwork = await createModelCpu(modelBuffer)
         warmupModel(policyNetwork, [1, 5])
         console.log('Model loaded successfully')
         setPolicyNetwork(policyNetwork)

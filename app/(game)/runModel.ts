@@ -1,5 +1,9 @@
 import { InferenceSession, Tensor } from 'onnxruntime-web'
 
+import * as ort from 'onnxruntime-web'
+
+ort.InferenceSession
+
 export async function createModelGpu(model: ArrayBuffer): Promise<InferenceSession> {
   return await InferenceSession.create(model, { executionProviders: ['webgl'] })
 }
