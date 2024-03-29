@@ -43,15 +43,12 @@ export default function Tiles() {
   useEffect(() => {
     const loadModels = async () => {
       try {
-        console.log('here')
         const modelFile = await fetch(
           'https://raw.githubusercontent.com/noahgsolomon/bunnymodel/main/policy/model.onnx',
         )
-        console.log('herdde')
         const modelBuffer = await modelFile.arrayBuffer()
-        console.log('hedddddddre')
         const policyNetwork = await createModelCpu(modelBuffer)
-        warmupModel(policyNetwork, [1, 5])
+        warmupModel(policyNetwork)
         console.log('Model loaded successfully')
         setPolicyNetwork(policyNetwork)
       } catch (error) {
@@ -99,7 +96,6 @@ export default function Tiles() {
   const [mapResetCount, setMapResetCount] = useState(0)
 
   const agentTiles = useMemo(() => {
-    console.log(mapResetCount)
     const randTiles = []
     for (let i = 0; i < NUM_AGENTS; i++) {
       let rand = Math.round(Math.random() * TILE_COUNT - 1)

@@ -8,17 +8,21 @@ export async function createModelGpu(model: ArrayBuffer): Promise<InferenceSessi
   return await InferenceSession.create(model, { executionProviders: ['webgl'] })
 }
 export async function createModelCpu(model: ArrayBuffer): Promise<InferenceSession> {
-  return await InferenceSession.create(model, { executionProviders: ['wasm'] })
+  return await InferenceSession.create(model, {
+    executionProviders: ['wasm'],
+  })
 }
 
-export async function warmupModel(model: InferenceSession, dims: number[]) {
+export async function warmupModel(model: InferenceSession) {
   // OK. we generate a random input and call Session.run() as a warmup query
-  const size = dims.reduce((a, b) => a * b)
-  const warmupTensor = new Tensor('float32', new Float32Array(size), dims)
+  const warmupTensor = new Tensor('float32', new Float32Array(5), [1, 5])
 
-  for (let i = 0; i < size; i++) {
-    warmupTensor.data[i] = 1
-  }
+  warmupTensor.data[0] = 0
+  warmupTensor.data[1] = 0
+  warmupTensor.data[2] = 0
+  warmupTensor.data[3] = -4
+  warmupTensor.data[4] = 4
+
   try {
     const feeds: Record<string, Tensor> = {}
     feeds[model.inputNames[0]] = warmupTensor
@@ -28,15 +32,22 @@ export async function warmupModel(model: InferenceSession, dims: number[]) {
   }
 }
 
-export async function runModel(model: InferenceSession, preprocessedData: Tensor): Promise<[Tensor, number]> {
+export async function runModel(model: InferenceSession, input: number[]) {
   const start = new Date()
+  const tensor = new Tensor('float32', new Float32Array(5), [1, 5])
+
+  tensor.data[0] = input[0]
+  tensor.data[1] = input[1]
+  tensor.data[2] = input[2]
+  tensor.data[3] = input[3]
+  tensor.data[4] = input[4]
   try {
     const feeds: Record<string, Tensor> = {}
-    feeds[model.inputNames[0]] = preprocessedData
+    feeds[model.inputNames[0]] = tensor
     const outputData = await model.run(feeds)
     const end = new Date()
     const inferenceTime = end.getTime() - start.getTime()
-    const output = outputData[model.outputNames[0]]
+    const output = outputData[model.outputNames[0]].data[0]
 
     return [output, inferenceTime]
   } catch (e) {
