@@ -8,7 +8,7 @@ env = SnakeEnv()
 
 
 try:
-    model = PPO('MlpPolicy',env, verbose=1, tensorboard_log='logs')
+    model = PPO.load('models/100000.zip', env=env)
 
     TIMESTEPS = 5000
     iters = 0
