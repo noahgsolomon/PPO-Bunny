@@ -11,7 +11,6 @@ import HologramMaterial from './HologramMaterial'
 import Gum from './Models/Gum'
 import useEnvironment from './store/useEnvironment'
 import { Position, TileType, DefaultTile, GumTile, HologramTile, State } from '@/index.d'
-
 import { Perf } from 'r3f-perf'
 import useGameState from './store/useGameState'
 

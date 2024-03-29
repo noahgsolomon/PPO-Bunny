@@ -27,34 +27,6 @@ const View = dynamic(() => import('@/components/canvas/View').then((mod) => mod.
   ssr: false,
 })
 
-const colors = [
-  '#FFB6C1',
-  '#FFD700',
-  '#FFA07A',
-  '#FF69B4',
-  '#FFE4E1',
-  '#FF6347',
-  '#FFA500',
-  '#FFC0CB',
-  '#FF4500',
-  '#FFDAB9',
-  '#FF8C00',
-  '#FFA07A',
-  '#FF1493',
-  '#FF69B4',
-  '#FF6347',
-  '#FFA500',
-  '#FFB6C1',
-  '#FF4500',
-  '#FFD700',
-  '#FF8C00',
-  '#FFA07A',
-  '#FF69B4',
-  '#FF6347',
-  '#FFB6C1',
-  '#FFDAB9',
-]
-
 export default function Page() {
   const environment = useEnvironment()
   const gameState = useGameState()
@@ -111,7 +83,7 @@ export default function Page() {
         </PresentationControls>
 
         <Lights />
-        <PerspectiveCamera makeDefault position={[0, 0, 25]} />
+        <PerspectiveCamera makeDefault position={[0, 0, 40]} />
       </View>
 
       {gameState.state === 'LOADING' && (
