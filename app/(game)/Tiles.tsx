@@ -2,7 +2,7 @@
 
 import 'regenerator-runtime/runtime'
 import { animated, config, useSpring, useSprings } from '@react-spring/three'
-import { Center, Grid, RoundedBox, Text3D } from '@react-three/drei'
+import { Center, Grid, RoundedBox } from '@react-three/drei'
 import { Player } from './Player'
 import { Fragment, useEffect, useMemo, useRef, useState } from 'react'
 import { Group } from 'three'

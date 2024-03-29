@@ -8,14 +8,14 @@ env = SnakeEnv()
 
 
 try:
-    model = PPO.load('models/100000.zip', env=env)
+    model = PPO.load('models/new/40000.zip', env=env)
 
     TIMESTEPS = 5000
     iters = 0
     while iters < 20:
         iters += 1
         model.learn(total_timesteps=TIMESTEPS, callback=None, log_interval=1, tb_log_name='PPO', reset_num_timesteps=True, progress_bar=True)
-        model.save(f"models/new/{TIMESTEPS*iters}")
+        model.save(f"models/new/{TIMESTEPS*iters+40000}")
 
 except Exception as e:
     exc_type, exc_obj, tb = sys.exc_info()

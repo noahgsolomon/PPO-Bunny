@@ -13,7 +13,7 @@ class OnnxableSB3Policy(torch.nn.Module):
         # policy() returns `actions, values, log_prob` for PPO
         return self.policy(observation, deterministic=False)
 
-model = PPO.load("models/new/40000.zip")
+model = PPO.load("models/new/100000.zip")
 onnx_policy = OnnxableSB3Policy(model.policy)
 
 distance  = np.linalg.norm(np.array([0, 0]) - np.array([1 ,1]))
