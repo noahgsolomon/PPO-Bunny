@@ -81,4 +81,6 @@ export type AgentObservation = {
 export type GameState = {
   state: string
   setState: (state: string) => void
+  changingText: string
+  setChangingText: (changingText: string) => void
 }

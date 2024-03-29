@@ -65,6 +65,12 @@ export default function Page() {
     config: webConfig.wobbly,
   })
 
+  const changingAnimation = useSpring({
+    opacity: gameState.state === 'CHANGING' ? 1 : 0,
+    transform: gameState.state === 'CHANGING' ? 'translateY(0)' : 'translateY(-100%)',
+    config: webConfig.default,
+  })
+
   const playingAnimation = useSpring({
     opacity: gameState.state === 'RUNNING' ? 1 : 0,
     transform: gameState.state === 'RUNNING' ? 'translateY(0)' : 'translateY(-200%)',
@@ -112,105 +118,81 @@ export default function Page() {
         style={initialAnimation}
         className='z-10 absolute top-16 text-center w-full flex items-center flex-col gap-4'
       >
-        <h1 className='text-4xl font-bold italic'>PPO Bunny</h1>
-        <div className='flex flex-row gap-2'>
-          <Button className='flex flex-row gap-2 ' onClick={() => gameState.setState('RUNNING')} size='lg'>
-            Run <Rabbit className='size-4' />
-          </Button>
-          <Dialog>
-            <DialogTrigger>
-              <Button size='lg' className='flex flex-row gap-2' variant='outline'>
-                Info <Info className='size-4' />
+        {gameState.state === 'INITIAL' && (
+          <>
+            <h1 className='text-4xl font-bold italic'>PPO Bunny</h1>
+            <div className='flex flex-row gap-2'>
+              <Button className='flex flex-row gap-2 ' onClick={() => gameState.setState('CHANGING')} size='lg'>
+                Run <Rabbit className='size-4' />
               </Button>
-            </DialogTrigger>
-            <DialogContent className='max-w-[90%] sm:max-w-lg bg-card text-sm max-h-[70%] overflow-y-auto'>
-              <DialogHeader>
-                <DialogTitle>INFO</DialogTitle>
-                <DialogDescription className='text-primary/70'>
-                  PPO Bunny is a PPO simulation where bunnies learn to navigate a complex environment in order to
-                  retrieve the most optimal reward from a trajectory of n steps.
-                </DialogDescription>
-              </DialogHeader>
-              <Image
-                src={'/bunnyupclose.png'}
-                width={400}
-                height={250}
-                className='rounded-lg border mx-auto'
-                alt='bunny'
-              />
-              <div>
-                <h2 className='font-bold'>The future of ai??</h2>
-                <p className='text-primary/70'>
-                  The aim of this project is to serve as a proof of concept. That the training procedure can take place
-                  on customers devices. This has incredible security implications, especially considering when networks
-                  need to be trained on customer data but the company is not allowed to store that data. By loading and
-                  training on the customers device, there is no need to store this data. Instead, it is immediately
-                  baked into the network(s).
-                </p>
-              </div>
-              <div>
-                <h2>How do the bunnies even learn?</h2>
-                <p className={'text-primary/70'}>
-                  The bunnies use a Proximal Gradient method known as Proximal Policy Optimization (PPO). This video
-                  <Link
-                    className={buttonVariants({ variant: 'link' })}
-                    target='_blank'
-                    href='https://www.youtube.com/watch?v=TjHH_--7l8g&t=2019s'
-                  >
-                    HERE
-                  </Link>
-                  covers the high level quite nicely.
-                </p>
-              </div>
-            </DialogContent>
-          </Dialog>
-        </div>
+              <Dialog>
+                <DialogTrigger>
+                  <Button size='lg' className='flex flex-row gap-2' variant='outline'>
+                    Info <Info className='size-4' />
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className='max-w-[90%] sm:max-w-lg bg-card text-sm max-h-[70%] overflow-y-auto'>
+                  <DialogHeader>
+                    <DialogTitle>INFO</DialogTitle>
+                    <DialogDescription className='text-primary/70'>
+                      PPO Bunny is a PPO simulation where bunnies learn to navigate a complex environment in order to
+                      retrieve the most optimal reward from a trajectory of n steps.
+                    </DialogDescription>
+                  </DialogHeader>
+                  <Image
+                    src={'/bunnyupclose.png'}
+                    width={400}
+                    height={250}
+                    className='rounded-lg border mx-auto'
+                    alt='bunny'
+                  />
+                  <div>
+                    <h2 className='font-bold'>The future of ai??</h2>
+                    <p className='text-primary/70'>
+                      The aim of this project is to serve as a proof of concept. That the training procedure can take
+                      place on customers devices. This has incredible security implications, especially considering when
+                      networks need to be trained on customer data but the company is not allowed to store that data. By
+                      loading and training on the customers device, there is no need to store this data. Instead, it is
+                      immediately baked into the network(s).
+                    </p>
+                  </div>
+                  <div>
+                    <h2>How do the bunnies even learn?</h2>
+                    <p className={'text-primary/70'}>
+                      The bunnies use a Proximal Gradient method known as Proximal Policy Optimization (PPO). This video
+                      <Link
+                        className={buttonVariants({ variant: 'link' })}
+                        target='_blank'
+                        href='https://www.youtube.com/watch?v=TjHH_--7l8g&t=2019s'
+                      >
+                        HERE
+                      </Link>
+                      covers the high level quite nicely.
+                    </p>
+                  </div>
+                </DialogContent>
+              </Dialog>
+            </div>
+          </>
+        )}
       </animated.div>
       <animated.div
         style={playingAnimation}
         className='z-10 absolute top-16 text-center w-full flex items-center flex-col gap-4'
       >
-        <h1 className=' font-bold italic text-4xl'>Running</h1>
+        <h1 className=' font-bold italic text-4xl'>Find the reward</h1>
         <p>lvl. 1</p>
       </animated.div>
-      {gameState.state === 'RUNNING' && (
-        <div className={'bottom-16 z-10 absolute text-center w-full flex justify-center flex-row gap-4'}>
-          <Button
-            disabled={environment.currentAgentIdx === 0}
-            onClick={() => environment.setCurrentAgentIdx(environment.currentAgentIdx - 1)}
-            variant='none'
-          >
-            <ArrowLeft className='size-8' />
-          </Button>
-          <div className={'flex flex-col gap-2 items-center'}>
-            <div className={'flex items-center gap-4'}>
-              <Avatar
-                style={{ borderColor: colors[environment.currentAgentIdx] ?? '#ffffff' }}
-                className={`border-[5px] outline-2 size-16`}
-              >
-                <AvatarImage src='/bunnypfp.png' />
-              </Avatar>
-              <div className='flex flex-col gap-2'>
-                <div className='flex flex-row gap-2 items-center'>
-                  <Image unoptimized src={'/coin.webp'} alt='coin' width={24} height={24} />{' '}
-                  <span className='text-yellow-500 font-bold text-2xl'>
-                    {environment.agentEnvironment[environment.currentAgentIdx].coins}
-                  </span>
-                </div>
-              </div>
-            </div>
-            <h1 className='font-bold text-2xl'>AGENT_{environment.currentAgentIdx}</h1>
-          </div>
-
-          <Button
-            disabled={environment.currentAgentIdx >= NUM_AGENTS - 1}
-            onClick={() => environment.setCurrentAgentIdx(environment.currentAgentIdx + 1)}
-            variant='none'
-          >
-            <ArrowRight className='size-8' />
-          </Button>
-        </div>
-      )}
+      <animated.div
+        style={changingAnimation}
+        className='z-10 absolute top-16 text-center w-full flex items-center flex-col gap-4'
+      >
+        {gameState.state === 'CHANGING' && (
+          <>
+            <h1 className='text-4xl font-bold italic'>{gameState.changingText}</h1>
+          </>
+        )}
+      </animated.div>
     </div>
   )
 }
