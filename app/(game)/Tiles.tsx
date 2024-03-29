@@ -330,8 +330,6 @@ export default function Tiles() {
     let intervalId
 
     const moveAgents = async () => {
-      console.log('hi')
-
       const directions: ('left' | 'right' | 'up' | 'down')[] = ['left', 'up', 'right', 'down']
 
       let numFinished = 0
