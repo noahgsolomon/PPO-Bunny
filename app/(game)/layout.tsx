@@ -7,8 +7,26 @@ import { Toaster } from '@/components/ui/sonner'
 const krypton = localFont({ src: '../../public/krypton.otf' })
 
 export const metadata = {
-  title: 'Next.js + Three.js',
-  description: 'A minimal starter for Nextjs + React-three-fiber and Threejs.',
+  title: 'PPO Bunny',
+  description: 'Maximizing an objective function one hop at a',
+  icons: {
+    icon: '/favicon.ico',
+  },
+  openGraph: {
+    title: 'PPO Bunny',
+    description: 'Maximizing an objective function one hop at a',
+    url: 'https://ppobunny.vercel.app',
+    siteName: 'PPO Bunny',
+    images: [
+      {
+        url: '/bunnycard.webp',
+        width: 1200,
+        height: 630,
+      },
+    ],
+    locale: 'en-US',
+    type: 'website',
+  },
 }
 
 export default function RootLayout({ children }) {
