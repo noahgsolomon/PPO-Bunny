@@ -11,7 +11,9 @@ export function Skull(props: GroupProps) {
   return (
     <group {...props} dispose={null}>
       <group rotation={[-Math.PI / 2, 0, 0]}>
+        {/*@ts-ignore */}
         <mesh castShadow receiveShadow geometry={(nodes.Cube_0 as Mesh).geometry} material={material} />
+        {/*@ts-ignore */}
         <mesh castShadow receiveShadow geometry={(nodes.Cube001_0 as Mesh).geometry} material={material} />
       </group>
     </group>

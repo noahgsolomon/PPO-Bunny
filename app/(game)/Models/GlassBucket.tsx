@@ -11,6 +11,7 @@ export function GlassBucket(props: GroupProps) {
   return (
     <group {...props} dispose={null}>
       <mesh
+        /*@ts-ignore */
         castShadow
         geometry={(nodes.imagetostl_mesh0 as Mesh).geometry}
         material={material}

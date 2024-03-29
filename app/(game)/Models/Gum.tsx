@@ -11,6 +11,7 @@ export default function Gum(props: MeshProps) {
   })
 
   return (
+    /*@ts-ignore */
     <mesh castShadow ref={gumRef} position-y={0.5}>
       <dodecahedronGeometry args={[0.35, 0]} />
       <meshStandardMaterial color={'#fc4bb3'} />

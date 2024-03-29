@@ -9,6 +9,7 @@ export default function Heart(props: GroupProps) {
     <group {...props} dispose={null}>
       <mesh
         scale={0.3}
+        /*@ts-ignore */
         geometry={(nodes.heart_teamRed as Mesh).geometry}
         material={materials['Red.015']}
         rotation={[Math.PI / 2, 0, 0]}

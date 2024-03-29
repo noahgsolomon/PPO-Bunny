@@ -33,6 +33,7 @@ export const Player = forwardRef<any, any>((props, ref) => {
         )}
       </animated.group> */}
       <animated.group
+        /*@ts-ignore */
         rotation-y={rotation}
         onPointerEnter={(e) => {
           e.stopPropagation()

@@ -37,6 +37,7 @@ export default function CloneBunny(props: GroupProps) {
   return (
     <group scale={0.25} {...props} dispose={null}>
       <mesh
+        //@ts-ignore
         geometry={(nodes.Bunny as Mesh).geometry}
         material={material}
         position={[0, -0.5, 0]}
