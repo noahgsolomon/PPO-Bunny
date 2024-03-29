@@ -58,6 +58,7 @@ export type State = {
   posY: number
   targetPosX: number
   targetPosY: number
+  distance: number
 }
 
 export type Action = {

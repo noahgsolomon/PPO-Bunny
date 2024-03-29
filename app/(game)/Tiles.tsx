@@ -31,14 +31,14 @@ import useGameState from './store/useGameState'
 
 import { toast } from 'sonner'
 import { createModelCpu, createModelGpu, runModel, warmupModel } from './runModel'
+import { InferenceSession } from 'onnxruntime-web/wasm'
 
 // SAVE POINT
 
 export const NUM_AGENTS = 10
 
 export default function Tiles() {
-  const [policyNetwork, setPolicyNetwork] = useState(null)
-  // const [valueNetwork, setValueNetwork] = useState<tf.LayersModel>(null)
+  const [policyNetwork, setPolicyNetwork] = useState<InferenceSession>(null)
 
   useEffect(() => {
     const loadModels = async () => {
@@ -58,7 +58,7 @@ export default function Tiles() {
   }, [])
 
   const AnimatedGrid = animated(Grid)
-  const TILE_COUNT = 100
+  const TILE_COUNT = 625
   const N_STEPS = 4
   const DISCOUNT_FACTOR = 0.9
   const OBSERVATION_RESERVOIR = 1000
@@ -207,7 +207,7 @@ export default function Tiles() {
 
     let newObservation: AgentObservation = {
       agentIdx,
-      state: { posX: 0, posY: 0, targetPosX: 0, targetPosY: 0 },
+      state: { posX: 0, posY: 0, targetPosX: 0, targetPosY: 0, distance: 0 },
       action: { index: 0, name: 'left' },
       actionOldProbability: oldProb,
       actionNewProbability: 0,
@@ -279,6 +279,7 @@ export default function Tiles() {
             posY: agent.position.y,
             targetPosX: environment.targetPosition.x,
             targetPosY: environment.targetPosition.y,
+            distance: 0,
           }
 
           observation.map((observation) => {
@@ -357,6 +358,7 @@ export default function Tiles() {
             posY: agent.position.y,
             targetPosX: environment.targetPosition.x,
             targetPosY: environment.targetPosition.y,
+            distance: 0,
           }
 
           observation.map((observation) => {
@@ -432,6 +434,7 @@ export default function Tiles() {
             posY: agent.position.y,
             targetPosX: environment.targetPosition.x,
             targetPosY: environment.targetPosition.y,
+            distance: 0,
           }
 
           observation.map((observation) => {
@@ -507,6 +510,7 @@ export default function Tiles() {
             posY: agent.position.y,
             targetPosX: environment.targetPosition.x,
             targetPosY: environment.targetPosition.y,
+            distance: 0,
           }
 
           newObservation.actionOldProbability = oldProb
@@ -564,7 +568,7 @@ export default function Tiles() {
   useEffect(() => {
     const moveAgents = async () => {
       // const startTime = performance.now()
-      const directions: ('left' | 'right' | 'up' | 'down')[] = ['left', 'right', 'up', 'down']
+      const directions: ('left' | 'right' | 'up' | 'down')[] = ['left', 'up', 'right', 'down']
 
       if (observations.length / OBSERVATION_RESERVOIR >= 1) {
         gameState.setState('OPTIMIZATION')
@@ -634,10 +638,20 @@ export default function Tiles() {
           posY: agentPosition.y,
           targetPosX: environment.targetPosition.x,
           targetPosY: environment.targetPosition.y,
+          distance: Math.sqrt(
+            Math.pow(environment.targetPosition.x - agentPosition.x, 2) +
+              Math.pow(environment.targetPosition.y - agentPosition.y, 2),
+          ),
         })
       }
 
-      const inputData = states.map((state) => [state.posX - state.targetPosX, state.posY - state.targetPosY])
+      const inputData = states.map((state) => [
+        state.posX,
+        state.posY,
+        state.targetPosX,
+        state.targetPosY,
+        state.distance,
+      ])
 
       // const input: number[][][] = states.map((agentObservation) => {
       //   const tileState = agentObservation.tileState as number[][]
@@ -650,7 +664,9 @@ export default function Tiles() {
 
       // const input_array = tf.tensor(inputData)
 
-      console.log(policyNetwork)
+      // console.log(policyNetwork)
+      const [actions, avgTime] = await runModel(policyNetwork, inputData)
+      console.log(avgTime)
       // const logits = policyNetwork.predict(input_array) as tf.Tensor2D
       // const prob = tf.softmax(logits)
       // const idx = await tf.multinomial(prob, 1).array()
@@ -661,11 +677,11 @@ export default function Tiles() {
           numFinished += 1
           setRewardArr((prev) => [...prev, environment.agentEnvironment[i].coins])
         } else {
-          // move(directions[idx[i][0]], i, probArr[i][idx[i][0]])
+          move(directions[actions[i]], i, 0)
         }
       }
 
-      if (numFinished >= NUM_AGENTS) {
+      if (numFinished >= NUM_AGENTS * 0.5) {
         resetAgentMetrics()
         setMapResetCount((prevCount) => prevCount + 1)
       }
