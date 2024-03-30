@@ -1,14 +1,17 @@
-from env_PPO import SnakeEnv
+# from env_PPO import SnakeEnv
 import pygame
-
+import gymnasium as gym
 from stable_baselines3 import PPO
 import traceback
 import sys
-env = SnakeEnv()
+from env_PPO import SnakeEnv
 
+
+env = gym.make('SnakeEnv-v0')
 
 try:
-    model = PPO.load('models/new/40000.zip', env=env)
+    model = PPO.load('models/new/100000.zip', env=env)
+
 
     TIMESTEPS = 5000
     iters = 0

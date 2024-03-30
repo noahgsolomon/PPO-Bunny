@@ -7,6 +7,7 @@ import numpy as np
 
 from Agent import Snake
 import Constants
+from gymnasium.envs.registration import register
 
 
 WIDTH, HEIGHT = Constants.WIDTH, Constants.HEIGHT
@@ -112,3 +113,9 @@ class SnakeEnv(gym.Env):
             if event.type == pygame.QUIT:
                 self.run = False
                 self.close()
+
+
+register(
+    id='SnakeEnv-v0',
+    entry_point='env_PPO:SnakeEnv',
+)
