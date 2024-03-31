@@ -6,3 +6,4 @@ node_modules/*
 .next/*
 .DS_Store
 .env
+train/venv/*

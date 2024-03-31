@@ -26,7 +26,7 @@ export default function Tiles() {
     const loadModels = async () => {
       gameState.setState('LOADING_MODEL')
       try {
-        const modelFile = await fetch('/model/model.onnx')
+        const modelFile = await fetch('/model/actor.onnx')
         const modelBuffer = await modelFile.arrayBuffer()
         const policyNetwork = await createModelCpu(modelBuffer)
         warmupModel(policyNetwork)
