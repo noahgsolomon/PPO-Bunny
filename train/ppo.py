@@ -1,4 +1,3 @@
-# docs and experiment results can be found at https://docs.cleanrl.dev/rl-algorithms/ppo/#ppopy
 import os
 import random
 import time
@@ -23,6 +22,9 @@ class Args:
     seed: int = 1
     """seed of the experiment"""
     torch_deterministic: bool = False
+    optimizer_path: str = 'models/optimizer.pth'
+    model_path: str = 'models/model.pth'
+    actor_path: str = 'models/actor.pth'
     """if toggled, `torch.backends.cudnn.deterministic=False`"""
     cuda: bool = True
     """if toggled, cuda will be enabled by default"""
@@ -37,12 +39,12 @@ class Args:
 
     # Algorithm specific arguments
     env_id: str = "SnakeEnv-v0"
-    """the id of the environment"""
+    """the id of the gym environment"""
     total_timesteps: int = 1000000
     """total timesteps of the experiments"""
     learning_rate: float = 2.5e-4
     """the learning rate of the optimizer"""
-    num_envs: int = 4
+    num_envs: int = 10
     """the number of parallel game environments"""
     num_steps: int = 128
     """the number of steps to run in each environment per policy rollout"""
@@ -68,8 +70,8 @@ class Args:
     """coefficient of the value function"""
     max_grad_norm: float = 0.5
     """the maximum norm for the gradient clipping"""
-    target_kl: float = None
-    """the target KL divergence threshold"""
+    # target_kl: float = None
+    # """the target KL divergence threshold"""
 
     # to be filled in runtime
     batch_size: int = 0
@@ -190,6 +192,16 @@ if __name__ == "__main__":
     agent = Agent(envs).to(device)
     optimizer = optim.Adam(agent.parameters(), lr=args.learning_rate, eps=1e-5)
 
+    if os.path.exists(args.model_path):
+        print(f'loading saved model from {args.model_path}')
+        agent.load_state_dict(torch.load(args.model_path))
+        agent.eval()
+
+        if os.path.exists(args.optimizer_path):
+            print(f'loading saved optimizer state from {args.optimizer_path}')
+            optimizer.load_state_dict(torch.load(args.optimizer_path))
+
+
     # ALGO Logic: Storage setup
     obs = torch.zeros((args.num_steps, args.num_envs) + envs.single_observation_space.shape).to(device)
     actions = torch.zeros((args.num_steps, args.num_envs) + envs.single_action_space.shape).to(device)
@@ -276,8 +288,8 @@ if __name__ == "__main__":
 
                 with torch.no_grad():
                     # calculate approx_kl http://joschu.net/blog/kl-approx.html
-                    old_approx_kl = (-logratio).mean()
-                    approx_kl = ((ratio - 1) - logratio).mean()
+                    # old_approx_kl = (-logratio).mean()
+                    # approx_kl = ((ratio - 1) - logratio).mean()
                     clipfracs += [((ratio - 1.0).abs() > args.clip_coef).float().mean().item()]
 
                 mb_advantages = b_advantages[mb_inds]
@@ -312,8 +324,8 @@ if __name__ == "__main__":
                 nn.utils.clip_grad_norm_(agent.parameters(), args.max_grad_norm)
                 optimizer.step()
 
-            if args.target_kl is not None and approx_kl > args.target_kl:
-                break
+            # if args.target_kl is not None and approx_kl > args.target_kl:
+                # break
 
         y_pred, y_true = b_values.cpu().numpy(), b_returns.cpu().numpy()
         var_y = np.var(y_true)
@@ -324,15 +336,17 @@ if __name__ == "__main__":
         writer.add_scalar("losses/value_loss", v_loss.item(), global_step)
         writer.add_scalar("losses/policy_loss", pg_loss.item(), global_step)
         writer.add_scalar("losses/entropy", entropy_loss.item(), global_step)
-        writer.add_scalar("losses/old_approx_kl", old_approx_kl.item(), global_step)
-        writer.add_scalar("losses/approx_kl", approx_kl.item(), global_step)
+        # writer.add_scalar("losses/old_approx_kl", old_approx_kl.item(), global_step)
+        # writer.add_scalar("losses/approx_kl", approx_kl.item(), global_step)
         writer.add_scalar("losses/clipfrac", np.mean(clipfracs), global_step)
         writer.add_scalar("losses/explained_variance", explained_var, global_step)
         print("SPS:", int(global_step / (time.time() - start_time)))
         writer.add_scalar("charts/SPS", int(global_step / (time.time() - start_time)), global_step)
     
     
-    torch.save(agent.actor.state_dict(), f"models/actor/agent_final.pth")
+    torch.save(agent.actor.state_dict(), args.actor_path)
+    torch.save(agent.state_dict(), args.model_path)
+    torch.save(optimizer.state_dict(), args.optimizer_path)
 
     envs.close()
     writer.close()
