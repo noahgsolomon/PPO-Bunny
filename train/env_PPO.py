@@ -6,12 +6,12 @@ import random
 import numpy as np
 
 from Agent import Snake
-import Constants
 from gymnasium.envs.registration import register
 from typing import Optional, Union
 
 
-WIDTH, HEIGHT = Constants.WIDTH, Constants.HEIGHT
+HEIGHT = 510
+WIDTH = 1005
 get_random_apple = lambda: [random.randrange(1,int(WIDTH/15))*15,random.randrange(1,int(HEIGHT/15))*15]
 
 
@@ -19,6 +19,8 @@ class SnakeEnv(gym.Env[np.ndarray, Union[int, np.ndarray]]):
 
     def __init__(self, render_mode: Optional[str] = None):
         super(SnakeEnv, self).__init__()
+        
+        self.metadata = {"render_modes": ["human", "rgb_array"], "render_fps": 30}
 
         self.screen = None
 
@@ -93,6 +95,13 @@ class SnakeEnv(gym.Env[np.ndarray, Union[int, np.ndarray]]):
 
 
     def render(self):
+        if self.render_mode is None:
+            gym.logger.warn(
+                "You are calling render method without specifying any render mode. "
+                "You can specify the render_mode at initialization, "
+                f'e.g. gym.make("{self.spec.id}", render_mode="rgb_array")'
+            )
+            return
         if self.render_mode == 'human':
             self.screen = pygame.display.set_mode((WIDTH, HEIGHT))
             self.screen.fill((0,0,0))
@@ -116,6 +125,35 @@ class SnakeEnv(gym.Env[np.ndarray, Union[int, np.ndarray]]):
                 if event.type == pygame.QUIT:
                     self.run = False
                     self.close()
+
+        elif self.render_mode == 'rgb_array':
+            if self.screen is None:
+                self.screen = pygame.Surface((WIDTH, HEIGHT))
+            
+            self.screen.fill((0, 0, 0))
+            pygame.draw.rect(self.screen, (255, 0, 0), [self.Apple[0], self.Apple[1], 15, 15])
+
+            for pos in self.Agent.tail:
+                pygame.draw.rect(self.screen, (0, 0, 120), [pos[0], pos[1], 15, 15])
+
+            self.Agent.tail.insert(0, list(self.Agent.head))
+            self.Agent.tail.pop()
+
+            blockSize = 15
+            for x in range(0, 1200, blockSize):
+                for y in range(75, 800, blockSize):
+                    rect = pygame.Rect(x, y, blockSize, blockSize)
+                    pygame.draw.rect(self.screen, (25, 25, 25), rect, 1)
+
+            rgb_array = pygame.surfarray.array3d(self.screen)
+            return rgb_array
+    
+    def close(self):
+        if self.screen is not None:
+            import pygame
+
+            pygame.display.quit()
+            pygame.quit()
 
 
 register(

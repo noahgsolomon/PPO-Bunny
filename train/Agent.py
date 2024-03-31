@@ -1,7 +1,7 @@
 import random
-import Constants
 
-WIDTH, HEIGHT = Constants.WIDTH, Constants.HEIGHT
+HEIGHT = 510
+WIDTH = 1005
 
 class Snake:
 
