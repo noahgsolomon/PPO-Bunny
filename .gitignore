@@ -7,3 +7,7 @@ node_modules/*
 .DS_Store
 .env
 train/venv/*
+train/videos/*
+train/models/*
+train/runs/*
+train/wandb/*

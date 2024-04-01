@@ -1,5 +1,5 @@
 import torch
-from env_PPO import SnakeEnv
+from train.env import SnakeEnv
 import numpy as np
 import gymnasium as gym
 from ppo import Actor, Args, make_env

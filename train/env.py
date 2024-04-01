@@ -15,12 +15,12 @@ WIDTH = 1005
 get_random_apple = lambda: [random.randrange(1,int(WIDTH/15))*15,random.randrange(1,int(HEIGHT/15))*15]
 
 
-class SnakeEnv(gym.Env[np.ndarray, Union[int, np.ndarray]]):
+class LevelOneEnv(gym.Env[np.ndarray, Union[int, np.ndarray]]):
 
     def __init__(self, render_mode: Optional[str] = None):
-        super(SnakeEnv, self).__init__()
+        super(LevelOneEnv, self).__init__()
         
-        self.metadata = {"render_modes": ["human", "rgb_array"], "render_fps": 30}
+        self.metadata = {"render_modes": ["human", "rgb_array"], "render_fps": 30, 'codec': 'h264'}
 
         self.screen = None
 
@@ -157,6 +157,6 @@ class SnakeEnv(gym.Env[np.ndarray, Union[int, np.ndarray]]):
 
 
 register(
-    id='SnakeEnv-v0',
-    entry_point='env_PPO:SnakeEnv',
+    id='LevelOne',
+    entry_point='env:LevelOneEnv',
 )

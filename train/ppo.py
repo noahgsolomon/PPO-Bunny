@@ -3,7 +3,7 @@ import random
 import time
 from dataclasses import dataclass
 
-from env_PPO import SnakeEnv
+from env import LevelOneEnv
 
 import gymnasium as gym
 import numpy as np
@@ -21,26 +21,26 @@ class Args:
     """the name of this experiment"""
     seed: int = 1
     """seed of the experiment"""
-    torch_deterministic: bool = False
+    torch_deterministic: bool = True
     optimizer_path: str = 'models/optimizer.pth'
     model_path: str = 'models/model.pth'
     actor_path: str = 'models/actor.pth'
     """if toggled, `torch.backends.cudnn.deterministic=False`"""
     cuda: bool = True
     """if toggled, cuda will be enabled by default"""
-    track: bool = False
+    track: bool = True
     """if toggled, this experiment will be tracked with Weights and Biases"""
-    wandb_project_name: str = "cleanRL"
+    wandb_project_name: str = "LevelOne"
     """the wandb's project name"""
-    wandb_entity: str = None
+    wandb_entity: str = 'noahsolomon'
     """the entity (team) of wandb's project"""
-    capture_video: bool = False
+    capture_video: bool = True
     """whether to capture videos of the agent performances (check out `videos` folder)"""
 
     # Algorithm specific arguments
-    env_id: str = "SnakeEnv-v0"
+    env_id: str = "LevelOne"
     """the id of the gym environment"""
-    total_timesteps: int = 1000000
+    total_timesteps: int = 50000
     """total timesteps of the experiments"""
     learning_rate: float = 2.5e-4
     """the learning rate of the optimizer"""
@@ -89,7 +89,6 @@ def make_env(env_id, idx, capture_video, run_name):
             env = gym.wrappers.RecordVideo(env, f"videos/{run_name}")
         else:
             env = gym.make(env_id)
-        # env = gym.wrappers.RecordEpisodeStatistics(env)
         return env
 
     return thunk
@@ -203,11 +202,23 @@ if __name__ == "__main__":
 
 
     # ALGO Logic: Storage setup
+            
+    # [num_steps, num_envs, obs_shape]
     obs = torch.zeros((args.num_steps, args.num_envs) + envs.single_observation_space.shape).to(device)
+    
+    # [num_steps, num_envs, action_shape]
     actions = torch.zeros((args.num_steps, args.num_envs) + envs.single_action_space.shape).to(device)
+
+    # [num_steps, num_envs] (denotes chosen actions log probability)
     logprobs = torch.zeros((args.num_steps, args.num_envs)).to(device)
+
+    # [num_steps, num_envs] (denotes the chosen action)
     rewards = torch.zeros((args.num_steps, args.num_envs)).to(device)
+
+    # [num_steps, num_envs] (denotes whether the trajectory is done)
     dones = torch.zeros((args.num_steps, args.num_envs)).to(device)
+
+    # [num_steps, num_envs] 
     values = torch.zeros((args.num_steps, args.num_envs)).to(device)
 
     # TRY NOT TO MODIFY: start the game
@@ -251,18 +262,34 @@ if __name__ == "__main__":
 
         # bootstrap value if not done
         with torch.no_grad():
+            # Get estimated value for the next state
             next_value = agent.get_value(next_obs).reshape(1, -1)
+            
+            # Initialize advantages tensor
             advantages = torch.zeros_like(rewards).to(device)
+            
+            # Initialize last GAE value
             lastgaelam = 0
+            
+            # Iterate over timesteps in reverse order
             for t in reversed(range(args.num_steps)):
+                # Determine nextnonterminal and nextvalues based on timestep
                 if t == args.num_steps - 1:
                     nextnonterminal = 1.0 - next_done
                     nextvalues = next_value
                 else:
                     nextnonterminal = 1.0 - dones[t + 1]
                     nextvalues = values[t + 1]
+                
+                # Calculate TD error
                 delta = rewards[t] + args.gamma * nextvalues * nextnonterminal - values[t]
-                advantages[t] = lastgaelam = delta + args.gamma * args.gae_lambda * nextnonterminal * lastgaelam
+                
+                # Calculate GAE and update last GAE value
+                lastgaelam = delta + args.gamma * args.gae_lambda * nextnonterminal * lastgaelam
+                
+                advantages[t] = delta + args.gamma * args.gae_lambda * nextnonterminal * lastgaelam
+    
+            # Calculate returns
             returns = advantages + values
 
         # flatten the batch
@@ -287,9 +314,6 @@ if __name__ == "__main__":
                 ratio = logratio.exp()
 
                 with torch.no_grad():
-                    # calculate approx_kl http://joschu.net/blog/kl-approx.html
-                    # old_approx_kl = (-logratio).mean()
-                    # approx_kl = ((ratio - 1) - logratio).mean()
                     clipfracs += [((ratio - 1.0).abs() > args.clip_coef).float().mean().item()]
 
                 mb_advantages = b_advantages[mb_inds]
@@ -329,6 +353,7 @@ if __name__ == "__main__":
 
         y_pred, y_true = b_values.cpu().numpy(), b_returns.cpu().numpy()
         var_y = np.var(y_true)
+        # print(var_y)
         explained_var = np.nan if var_y == 0 else 1 - np.var(y_true - y_pred) / var_y
 
         # TRY NOT TO MODIFY: record rewards for plotting purposes
