@@ -3,29 +3,28 @@ import '@/globals.css'
 import localFont from 'next/font/local'
 import { cn } from '../lib/utils'
 import { Toaster } from '@/components/ui/sonner'
+import { Metadata } from 'next'
 
 const krypton = localFont({ src: '../../public/krypton.otf' })
 
-export const metadata = {
-  title: 'PPO Bunny',
-  description: 'Maximizing an objective function one hop at a',
-  icons: {
-    icon: '/favicon.ico',
-  },
+export const metadata: Metadata = {
+  appleWebApp: true,
+  metadataBase: new URL('https://ppobunny.vercel.app'),
+  manifest: '/manifest.json',
+  icons: { apple: '/bunny.png' },
   openGraph: {
-    title: 'PPO Bunny',
-    description: 'Maximizing an objective function one hop at a',
-    url: 'https://ppobunny.vercel.app',
-    siteName: 'PPO Bunny',
-    images: [
-      {
-        url: '/bunnycard.webp',
-        width: 1200,
-        height: 630,
-      },
-    ],
-    locale: 'en-US',
-    type: 'website',
+    url: 'https://smart.wtf',
+    title: 'ppobunny.vercel.app',
+    description: 'Demonstration of PPO on the web',
+    images: ['https://images.smart.wtf/bunnycard.webp'],
+  },
+  title: 'ppobunny.vercel.app',
+  description: 'Demonstration of PPO on the web',
+  twitter: {
+    card: 'summary_large_image',
+    site: 'ppobunny.vercel.app',
+    creator: '@noahgsolomon',
+    images: ['https://images.smart.wtf/bunnycard.webp'],
   },
 }
 
