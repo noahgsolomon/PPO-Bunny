@@ -10,9 +10,9 @@ from gymnasium.envs.registration import register
 from typing import Optional, Union
 
 
-HEIGHT = 510
-WIDTH = 1005
-get_random_apple = lambda: [random.randrange(1,int(WIDTH/15))*15,random.randrange(1,int(HEIGHT/15))*15]
+HEIGHT = 25
+WIDTH = 25
+get_random_apple = lambda: [random.randrange(1,int(WIDTH)),random.randrange(1,int(HEIGHT))]
 
 
 class LevelOneEnv(gym.Env[np.ndarray, Union[int, np.ndarray]]):
@@ -41,28 +41,26 @@ class LevelOneEnv(gym.Env[np.ndarray, Union[int, np.ndarray]]):
 
     def step(self, action):
 
-        self.render()
-
         reward = 0
 
         if action == 0: # left
-            self.Agent.head[0] -= 15
+            self.Agent.head[0] -= 1
 
         if action == 1: # Up
-            self.Agent.head[1] -= 15
+            self.Agent.head[1] -= 1
 
         if action == 2: # Right
-            self.Agent.head[0] += 15
+            self.Agent.head[0] += 1
 
         if action == 3: # Down
-            self.Agent.head[1] += 15
+            self.Agent.head[1] += 1
 
 
         if np.linalg.norm(np.array([self.Agent.head[0], self.Agent.head[1]]) - np.array([self.Apple[0], self.Apple[1]])) < self.distance:
-            reward += 15
+            reward += 1
 
         else:
-            reward -= 5
+            reward -= 0.5
 
         self.distance = np.linalg.norm(np.array([self.Agent.head[0], self.Agent.head[1]]) - np.array([self.Apple[0], self.Apple[1]]))
 
@@ -128,15 +126,15 @@ class LevelOneEnv(gym.Env[np.ndarray, Union[int, np.ndarray]]):
 
         elif self.render_mode == 'rgb_array':
             if self.screen is None:
-                self.screen = pygame.Surface((WIDTH, HEIGHT))
+                self.screen = pygame.Surface((WIDTH*15, HEIGHT*15))
             
             self.screen.fill((0, 0, 0))
-            pygame.draw.rect(self.screen, (255, 0, 0), [self.Apple[0], self.Apple[1], 15, 15])
+            pygame.draw.rect(self.screen, (255, 0, 0), [self.Apple[0]*15, self.Apple[1]*15, 15, 15])
 
             for pos in self.Agent.tail:
-                pygame.draw.rect(self.screen, (0, 0, 120), [pos[0], pos[1], 15, 15])
+                pygame.draw.rect(self.screen, (0, 0, 120), [pos[0]*15, pos[1]*15, 15, 15])
 
-            self.Agent.tail.insert(0, list(self.Agent.head))
+            self.Agent.tail.insert(0, list(self.Agent.head*15))
             self.Agent.tail.pop()
 
             blockSize = 15
