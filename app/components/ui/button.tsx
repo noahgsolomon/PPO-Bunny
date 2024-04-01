@@ -10,6 +10,7 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default: 'transition-all bg-primary text-primary-foreground shadow hover:bg-primary/90',
+        robot: ' transition-all bg-[#3A3D5E] text-primary-foreground shadow hover:bg-[#3A3D5E]/90',
         destructive: 'bg-destructive text-destructive-foreground shadow-sm hover:bg-destructive/90',
         outline:
           'transition-all border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground',

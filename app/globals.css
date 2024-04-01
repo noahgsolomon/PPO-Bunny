@@ -75,6 +75,10 @@
     @apply bg-background text-foreground overflow-hidden;
   }
 
+  code {
+    @apply bg-secondary rounded-sm p-[2px] font-bold
+  }
+
   html,
   body,
   #root {
