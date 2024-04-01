@@ -11,12 +11,12 @@ export const metadata: Metadata = {
   appleWebApp: true,
   metadataBase: new URL('https://ppobunny.vercel.app'),
   manifest: '/manifest.json',
-  icons: { apple: '/bunny.png' },
+  icons: { apple: 'https://images.smart.wtf/bunny.png' },
   openGraph: {
-    url: 'https://smart.wtf',
-    title: 'ppobunny.vercel.app',
+    url: 'https://ppobunny.vercel.app',
+    title: 'PPO Bunny',
     description: 'Demonstration of PPO on the web',
-    images: ['https://images.smart.wtf/bunnycard.webp'],
+    images: ['https://images.smart.wtf/bunnycard.png'],
   },
   title: 'ppobunny.vercel.app',
   description: 'Demonstration of PPO on the web',
@@ -24,7 +24,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     site: 'ppobunny.vercel.app',
     creator: '@noahgsolomon',
-    images: ['https://images.smart.wtf/bunnycard.webp'],
+    images: ['https://images.smart.wtf/bunnycard.png'],
   },
 }
 
