@@ -142,7 +142,7 @@ export default function Page() {
                   <div>
                     <h2>How do the bunnies even learn?</h2>
                     <p className={'text-primary/70'}>
-                      The bunnies use a Proximal Gradient method known as Proximal Policy Optimization (PPO). This video
+                      The bunnies use a Policy Gradient method known as Proximal Policy Optimization (PPO). This video
                       <Link
                         className={buttonVariants({ variant: 'link' })}
                         target='_blank'
@@ -150,7 +150,14 @@ export default function Page() {
                       >
                         HERE
                       </Link>
-                      covers the high level quite nicely.
+                      covers the high level quite nicely. If you want to actually understand it tho read{' '}
+                      <Link
+                        className={buttonVariants({ variant: 'link' })}
+                        href={'https://fse.studenttheses.ub.rug.nl/25709/1/mAI_2021_BickD.pdf'}
+                        target='_blank'
+                      >
+                        THIS
+                      </Link>
                     </p>
                   </div>
                 </DialogContent>
