@@ -362,7 +362,7 @@ export default function Tiles() {
         }
       }
 
-      if (numFinished >= NUM_AGENTS * 0.8) {
+      if (numFinished >= NUM_AGENTS) {
         resetAgentMetrics()
         setMapResetCount((prevCount) => prevCount + 1)
         gameState.setState('CHANGING')

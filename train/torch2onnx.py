@@ -1,5 +1,5 @@
 import torch
-from train.env import SnakeEnv
+from env import LevelOneEnv
 import numpy as np
 import gymnasium as gym
 from ppo import Actor, Args, make_env
@@ -22,7 +22,7 @@ class OnnxableAgent(torch.nn.Module):
 args = tyro.cli(Args)
 device = torch.device("cuda" if torch.cuda.is_available() and args.cuda else "cpu")
 
-agent = Actor(gym.vector.SyncVectorEnv([make_env(args.env_id, i, args.capture_video, '') for i in range(args.num_envs)])).to(device)
+agent = Actor(gym.vector.SyncVectorEnv([make_env(args.env_id, i, False, '') for i in range(args.num_envs)])).to(device)
 agent.load_state_dict(torch.load("models/actor.pth"))
 
 onnx_agent = OnnxableAgent(agent)
