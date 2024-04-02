@@ -3,7 +3,7 @@ import random
 HEIGHT = 25
 WIDTH = 25
 
-class Snake:
+class Agent:
 
     def __init__(self):
 

@@ -5,7 +5,7 @@ import pygame
 import random
 import numpy as np
 
-from Agent import Snake
+from Agent import Agent
 from gymnasium.envs.registration import register
 from typing import Optional, Union
 
@@ -20,7 +20,7 @@ class LevelOneEnv(gym.Env[np.ndarray, Union[int, np.ndarray]]):
     def __init__(self, render_mode: Optional[str] = None):
         super(LevelOneEnv, self).__init__()
         
-        self.metadata = {"render_modes": ["human", "rgb_array"], "render_fps": 30, 'codec': 'h264'}
+        self.metadata = {"render_modes": ["human", "rgb_array"], "render_fps": 30}
 
         self.screen = None
 
@@ -29,11 +29,11 @@ class LevelOneEnv(gym.Env[np.ndarray, Union[int, np.ndarray]]):
         self.render_mode = render_mode
 
         self.action_space = spaces.Discrete(4)
-        self.observation_space = spaces.Box(low=0, high=1, shape=(5,), dtype=float)
+        self.observation_space = spaces.Box(low=0, high=WIDTH, shape=(5,), dtype=float)
 
         self.info = {}
 
-        self.Agent = Snake()
+        self.Agent = Agent()
         self.Apple = get_random_apple()
 
         self.distance = np.linalg.norm(np.array([self.Agent.head[0], self.Agent.head[1]]) - np.array([self.Apple[0], self.Apple[1]]))
@@ -83,7 +83,7 @@ class LevelOneEnv(gym.Env[np.ndarray, Union[int, np.ndarray]]):
         if seed is not None:
             np.random.seed(seed)
 
-        self.Agent = Snake()
+        self.Agent = Agent()
         self.Apple = get_random_apple()
         self.distance = np.linalg.norm(np.array([self.Agent.head[0], self.Agent.head[1]]) - np.array([self.Apple[0], self.Apple[1]]))
         self.observation = np.array([self.Agent.head[0], self.Agent.head[1], self.Apple[0], self.Apple[1], self.distance])
