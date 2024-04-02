@@ -1,5 +1,5 @@
 import torch
-from env import LevelOneEnv
+from LevelOneEnv import LevelOneEnv
 import numpy as np
 import gymnasium as gym
 from ppo import Actor, Args, make_env

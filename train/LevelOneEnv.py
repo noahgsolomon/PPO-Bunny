@@ -156,5 +156,5 @@ class LevelOneEnv(gym.Env[np.ndarray, Union[int, np.ndarray]]):
 
 register(
     id='LevelOne',
-    entry_point='env:LevelOneEnv',
+    entry_point='LevelOneEnv:LevelOneEnv',
 )

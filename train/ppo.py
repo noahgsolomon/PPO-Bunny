@@ -3,7 +3,7 @@ import random
 import time
 from dataclasses import dataclass
 
-from env import LevelOneEnv
+from LevelOneEnv import LevelOneEnv
 
 import gymnasium as gym
 import numpy as np
