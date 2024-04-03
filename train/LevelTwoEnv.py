@@ -51,7 +51,7 @@ class LevelTwoEnv(gym.Env[np.ndarray, Union[int, np.ndarray]]):
                 return pos
 
     def generate_hologram_tiles(self):
-        num_hologram_tiles = random.randint(12, 15)
+        num_hologram_tiles = random.randint(20, 40)
         hologram_tiles = []
         for _ in range(num_hologram_tiles):
             x = random.randrange(1, WIDTH)

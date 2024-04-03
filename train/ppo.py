@@ -42,9 +42,9 @@ class Args:
     # Algorithm specific arguments
     env_id: str = "LevelTwo"
     """the id of the gym environment"""
-    total_timesteps: int = 100_000
+    total_timesteps: int = 10_000
     """total timesteps of the experiments"""
-    learning_rate: float = 2.5e-4
+    learning_rate: float = 0
     """the learning rate of the optimizer"""
     num_envs: int = 10
     """the number of parallel game environments"""
