@@ -29,7 +29,7 @@ class LevelTwoEnv(gym.Env[np.ndarray, Union[int, np.ndarray]]):
         self.render_mode = render_mode
 
         self.action_space = spaces.Discrete(4)
-        self.observation_space = spaces.Box(low=0, high=1, shape=(14,), dtype=float)
+        self.observation_space = spaces.Box(low=0, high=1, shape=(30,), dtype=float)
 
         self.info = {}
 
@@ -50,9 +50,9 @@ class LevelTwoEnv(gym.Env[np.ndarray, Union[int, np.ndarray]]):
         return hologram_tiles
 
     def get_agent_vision(self):
-        vision = np.zeros((3, 3))
-        for i in range(-1, 2):
-            for j in range(-1, 2):
+        vision = np.zeros((5, 5))
+        for i in range(-2, 3):
+            for j in range(-2, 3):
                 x = self.Agent.head[0] + i
                 y = self.Agent.head[1] + j
                 if 0 <= x < WIDTH and 0 <= y < HEIGHT:
@@ -81,10 +81,10 @@ class LevelTwoEnv(gym.Env[np.ndarray, Union[int, np.ndarray]]):
         current_distance = np.linalg.norm(np.array([self.Agent.head[0]/WIDTH, self.Agent.head[1]/WIDTH]) - np.array([self.Apple[0]/WIDTH, self.Apple[1]/WIDTH]))
 
         if current_distance < self.distance:
-            reward += 0.5
+            reward += 0.25
 
         else:
-            reward -= 0.1
+            reward -= 0.25
 
         self.distance = current_distance
 
@@ -94,9 +94,10 @@ class LevelTwoEnv(gym.Env[np.ndarray, Union[int, np.ndarray]]):
 
         if self.Agent.head[1] < 0 or self.Agent.head[0] < 0 or self.Agent.head[1] > HEIGHT or self.Agent.head[0] > WIDTH or self.Agent.head in self.hologram_tiles:
             self.done = True
-            reward -= 5
+            reward -= 2.5
 
         if self.Apple == self.Agent.head:
+            reward += 2.5
             self.Agent.tail.insert(0,list(self.Agent.head))
             self.Apple = get_random_apple()
             self.distance = np.linalg.norm(np.array([self.Agent.head[0]/WIDTH, self.Agent.head[1]/WIDTH]) - np.array([self.Apple[0]/WIDTH, self.Apple[1]/WIDTH]))

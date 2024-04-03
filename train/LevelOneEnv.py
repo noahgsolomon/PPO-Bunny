@@ -18,7 +18,7 @@ get_random_apple = lambda: [random.randrange(1,int(WIDTH)),random.randrange(1,in
 class LevelOneEnv(gym.Env[np.ndarray, Union[int, np.ndarray]]):
 
     def __init__(self, render_mode: Optional[str] = None):
-        super(LevelOneEnv, self).__init__()
+        super().__init__()
         
         self.metadata = {"render_modes": ["human", "rgb_array"], "render_fps": 30}
 
