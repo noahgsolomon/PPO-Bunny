@@ -29,7 +29,7 @@ class LevelTwoEnv(gym.Env[np.ndarray, Union[int, np.ndarray]]):
         self.render_mode = render_mode
 
         self.action_space = spaces.Discrete(4)
-        self.observation_space = spaces.Box(low=0, high=1, shape=(30,), dtype=float)
+        self.observation_space = spaces.Box(low=0, high=1, shape=(14,), dtype=float)
 
         self.info = {}
 
@@ -50,9 +50,9 @@ class LevelTwoEnv(gym.Env[np.ndarray, Union[int, np.ndarray]]):
         return hologram_tiles
 
     def get_agent_vision(self):
-        vision = np.zeros((5, 5))
-        for i in range(-2, 3):
-            for j in range(-2, 3):
+        vision = np.zeros((3, 3))
+        for i in range(-1, 2):
+            for j in range(-1, 2):
                 x = self.Agent.head[0] + i
                 y = self.Agent.head[1] + j
                 if 0 <= x < WIDTH and 0 <= y < HEIGHT:
