@@ -4,6 +4,7 @@ import time
 from dataclasses import dataclass
 
 from LevelOneEnv import LevelOneEnv
+from LevelTwoEnv import LevelTwoEnv
 
 import gymnasium as gym
 import numpy as np
@@ -38,11 +39,11 @@ class Args:
     """whether to capture videos of the agent performances (check out `videos` folder)"""
 
     # Algorithm specific arguments
-    env_id: str = "LevelOne"
+    env_id: str = "LevelTwo"
     """the id of the gym environment"""
-    total_timesteps: int = 50000
+    total_timesteps: int = 1000000
     """total timesteps of the experiments"""
-    learning_rate: float = 2.5e-4
+    learning_rate: float = 2.5e-5
     """the learning rate of the optimizer"""
     num_envs: int = 10
     """the number of parallel game environments"""
@@ -64,7 +65,7 @@ class Args:
     """the surrogate clipping coefficient"""
     clip_vloss: bool = True
     """Toggles whether or not to use a clipped loss for the value function, as per the paper."""
-    ent_coef: float = 0.01
+    ent_coef: float = 0.001
     """coefficient of the entropy"""
     vf_coef: float = 0.5
     """coefficient of the value function"""
