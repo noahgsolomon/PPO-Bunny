@@ -545,7 +545,7 @@ export default function LevelTwo() {
 }
 
 const generateTiles = (i: number, agentTiles: number[]) => {
-  const hologram = Math.random() > 0.925 && !agentTiles.includes(i)
+  const hologram = Math.random() > 0.85 && !agentTiles.includes(i)
   const tile = hologram ? 'HOLOGRAM' : 'DEFAULT'
 
   return {
