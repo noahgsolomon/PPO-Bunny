@@ -5,11 +5,11 @@ import { Button, buttonVariants } from '@/components/ui/button'
 import { config } from '@react-spring/three'
 import { animated, useSpring, config as webConfig } from '@react-spring/web'
 import { PerspectiveCamera, PresentationControls } from '@react-three/drei'
-import { ArrowLeft, ArrowRight, Brain, Info, Loader2, Rabbit, StopCircle, Trophy, Zap } from 'lucide-react'
+import { ArrowLeft, ArrowRight, Info, Rabbit, Zap } from 'lucide-react'
 import dynamic from 'next/dynamic'
 import Image from 'next/image'
 import Lights from './Lights'
-import Tiles, { NUM_AGENTS } from './Tiles'
+import LevelOne from './LevelOne'
 import useEnvironment from './store/useEnvironment'
 import useGameState from './store/useGameState'
 import {
@@ -22,6 +22,7 @@ import {
 } from '@/components/ui/dialog'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
+import LevelTwo from './LevelTwo'
 
 const View = dynamic(() => import('@/components/canvas/View').then((mod) => mod.View), {
   ssr: false,
@@ -85,7 +86,7 @@ export default function Page() {
           azimuth={[-Infinity, Infinity]}
           config={config.slow}
         >
-          <Tiles />
+          {gameState.currentLvl === 1 ? <LevelOne /> : <LevelTwo />}
         </PresentationControls>
 
         <Lights />
@@ -93,7 +94,7 @@ export default function Page() {
       </View>
 
       {gameState.state === 'LOADING' && (
-        <div className='absolute inset-0 flex justify-center items-center'>
+        <div className='bg-background z-50 absolute inset-0 flex justify-center items-center'>
           <p className='flex flex-row items-center gap-2'>
             Loading <Rabbit className='size-4' />
           </p>
@@ -186,11 +187,38 @@ export default function Page() {
 
       <animated.div
         style={modelAnimation}
-        className={'bottom-16 z-10 absolute text-center w-full flex justify-center flex-row gap-4'}
+        className={'bottom-16 z-10 absolute text-center w-full flex justify-center flex-col items-center gap-4'}
       >
+        <div className='items-center flex flex-row gap-2'>
+          <Button
+            disabled={
+              gameState.currentLvl === 1 || gameState.state === 'LOADING' || gameState.state === 'LOADING_MODEL'
+            }
+            size='sm'
+            onClick={() => {
+              gameState.setState('LOADING')
+              gameState.setCurrentLvl(gameState.currentLvl - 1)
+            }}
+          >
+            <ArrowLeft className='size-4' />
+          </Button>
+          Level {gameState.currentLvl}
+          <Button
+            disabled={
+              gameState.currentLvl === 2 || gameState.state === 'LOADING' || gameState.state === 'LOADING_MODEL'
+            }
+            size='sm'
+            onClick={() => {
+              gameState.setState('LOADING')
+              gameState.setCurrentLvl(gameState.currentLvl + 1)
+            }}
+          >
+            <ArrowRight className='size-4' />
+          </Button>
+        </div>
         <Dialog>
           <DialogTrigger>
-            <Button size='lg' className='flex flex-row gap-2 items-center '>
+            <Button variant='outline' size='lg' className='flex flex-row gap-2 items-center '>
               Model Details <Zap className='size-4 fill-yellow-500' />
             </Button>
           </DialogTrigger>
