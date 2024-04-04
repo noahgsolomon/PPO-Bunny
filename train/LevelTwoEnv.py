@@ -51,7 +51,7 @@ class LevelTwoEnv(gym.Env[np.ndarray, Union[int, np.ndarray]]):
                 return pos
 
     def generate_hologram_tiles(self):
-        num_hologram_tiles = random.randint(20, 40)
+        num_hologram_tiles = random.randint(25, 50)
         hologram_tiles = []
         for _ in range(num_hologram_tiles):
             x = random.randrange(1, WIDTH)
@@ -96,8 +96,11 @@ class LevelTwoEnv(gym.Env[np.ndarray, Union[int, np.ndarray]]):
         current_distance = np.linalg.norm(np.array([self.Agent.head[0]/WIDTH, self.Agent.head[1]/WIDTH]) - np.array([self.Apple[0]/WIDTH, self.Apple[1]/WIDTH]))
 
         if current_distance < self.distance:
-            reward += 0.25
+            reward += 1
 
+        if current_distance < self.distance:
+            reward -= 0.5
+        
         if self.Agent.head in self.prev_positions:
             # index = self.prev_positions.index(self.Agent.head)
             reward -= 0.5
@@ -113,7 +116,6 @@ class LevelTwoEnv(gym.Env[np.ndarray, Union[int, np.ndarray]]):
             reward -= 2.5
 
         if self.Apple == self.Agent.head:
-            reward += 2.5
             self.prev_positions = []
             self.Agent.tail.insert(0,list(self.Agent.head))
             self.Apple = self.get_random_apple()
