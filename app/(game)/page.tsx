@@ -172,7 +172,7 @@ export default function Page() {
         className='z-10 absolute top-16 text-center w-full flex items-center flex-col gap-4'
       >
         <h1 className=' font-bold italic text-4xl'>Find the reward</h1>
-        <p>lvl. 1</p>
+        <p>lvl. {gameState.currentLvl}</p>
       </animated.div>
       <animated.div
         style={changingAnimation}

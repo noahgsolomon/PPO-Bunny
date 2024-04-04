@@ -21,6 +21,7 @@ export const NUM_AGENTS = 10
 
 export default function LevelTwo() {
   const [policyNetwork, setPolicyNetwork] = useState<InferenceSession>(null)
+  const [intervalIter, setIntervalIter] = useState(0)
 
   useEffect(() => {
     const loadModels = async () => {
@@ -342,7 +343,7 @@ export default function LevelTwo() {
           for (let j = -1; j < 2; j++) {
             const x = agent.position.x + i
             const y = agent.position.y + j
-            vision.push(agent.tileMap[Math.sqrt(TILE_COUNT) * y + x].type.type === 'HOLOGRAM' ? 1 : 0)
+            vision.push(agent.tileMap[Math.sqrt(TILE_COUNT) * y + x]?.type.type === 'HOLOGRAM' ? 1 : 0)
           }
         }
 
@@ -383,15 +384,61 @@ export default function LevelTwo() {
         }
       }
 
-      if (numFinished >= NUM_AGENTS) {
+      if (intervalIter % 3 === 0) {
+        const rand = []
+
+        for (let i = 0; i < environment.agentEnvironment[environment.currentAgentIdx].tileMap.length; i++) {
+          rand.push(Math.random())
+        }
+
+        const agentPositions = environment.agentEnvironment.map((agent) => agent.position)
+        for (const agent of environment.agentEnvironment) {
+          const tileMap = agent.tileMap
+          let newTileMap = structuredClone(agent.tileMap)
+          let i = 0
+          for (const tile of tileMap) {
+            if (
+              tile.type.type === 'HOLOGRAM' &&
+              tile.position.x < Math.sqrt(TILE_COUNT) - 1 &&
+              tile.position.y < Math.sqrt(TILE_COUNT) - 1 &&
+              tile.position.x > 0 &&
+              tile.position.y > 0
+            ) {
+              let position = structuredClone(tile.position)
+              position.x = position.x + (rand[i] < 0.25 ? -1 : rand[i] < 0.5 ? 1 : 0)
+              position.y = position.y + (rand[i] > 0.75 ? -1 : rand[i] >= 0.5 ? 1 : 0)
+              const futureTile = tileMap.filter(
+                (tile) => tile.position.x === position.x && tile.position.y === position.y,
+              )
+              if (
+                futureTile.length > 0 &&
+                futureTile[0].type.type === 'DEFAULT' &&
+                agentPositions.filter(
+                  (agentPosition) => agentPosition.x === position.x && agentPosition.y === position.y,
+                ).length === 0
+              ) {
+                newTileMap[i].type = DefaultTile
+                newTileMap[position.x + position.y * Math.sqrt(TILE_COUNT)].type = HologramTile
+              }
+            }
+            i += 1
+          }
+          agent.setTileMap(newTileMap, agent.index)
+        }
+      }
+
+      if (numFinished >= NUM_AGENTS * 0.8) {
         resetAgentMetrics()
         setMapResetCount((prevCount) => prevCount + 1)
         gameState.setState('CHANGING')
       }
+      setIntervalIter((prev) => prev + 1)
     }
 
     if (gameState.state === 'RUNNING') {
-      intervalId = setInterval(moveAgents, 100)
+      intervalId = setInterval(() => {
+        moveAgents()
+      }, 175)
     }
 
     return () => {
@@ -498,7 +545,7 @@ export default function LevelTwo() {
 }
 
 const generateTiles = (i: number, agentTiles: number[]) => {
-  const hologram = Math.random() > 0.95 && !agentTiles.includes(i)
+  const hologram = Math.random() > 0.925 && !agentTiles.includes(i)
   const tile = hologram ? 'HOLOGRAM' : 'DEFAULT'
 
   return {
