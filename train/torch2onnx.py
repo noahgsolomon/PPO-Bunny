@@ -23,12 +23,12 @@ args = tyro.cli(Args)
 device = torch.device("cuda" if torch.cuda.is_available() and args.cuda else "cpu")
 
 agent = Actor(gym.vector.SyncVectorEnv([make_env(args.env_id, i, False, '') for i in range(args.num_envs)])).to(device)
-agent.load_state_dict(torch.load("models/actor.pth"))
+agent.load_state_dict(torch.load("models/leveltwo/actor.pth"))
 
 onnx_agent = OnnxableAgent(agent)
 
 distance = np.linalg.norm(np.array([0, 0]) - np.array([1, 1]))
-dummy_input = torch.Tensor([0, 0, 1, 1, distance]).unsqueeze(0)
+dummy_input = torch.Tensor([0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 1, distance]).unsqueeze(0)
 
 torch.onnx.export(
     onnx_agent,

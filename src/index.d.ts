@@ -83,4 +83,6 @@ export type GameState = {
   setState: (state: string) => void
   changingText: string
   setChangingText: (changingText: string) => void
+  currentLvl: number
+  setCurrentLvl: (currentLvl: number) => void
 }
