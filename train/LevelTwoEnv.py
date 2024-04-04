@@ -112,10 +112,11 @@ class LevelTwoEnv(gym.Env[np.ndarray, Union[int, np.ndarray]]):
         self.observation = np.concatenate((agent_vision, [self.Agent.head[0]/WIDTH, self.Agent.head[1]/WIDTH, self.Apple[0]/WIDTH, self.Apple[1]/WIDTH, self.distance]))
 
         if self.Agent.head[1] < 0 or self.Agent.head[0] < 0 or self.Agent.head[1] > HEIGHT or self.Agent.head[0] > WIDTH or self.Agent.head in self.hologram_tiles:
-            self.done = True
             reward -= 2.5
+            self.done = True
 
         if self.Apple == self.Agent.head:
+            reward += 2.5 - 1.5*(self.step_counter / 100)
             self.prev_positions = []
             self.Agent.tail.insert(0,list(self.Agent.head))
             self.Apple = self.get_random_apple()
