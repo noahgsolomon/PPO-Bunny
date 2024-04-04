@@ -36,15 +36,15 @@ class Args:
     """the wandb's project name"""
     wandb_entity: str = 'noahsolomon'
     """the entity (team) of wandb's project"""
-    capture_video: bool = True
+    capture_video: bool = False
     """whether to capture videos of the agent performances (check out `videos` folder)"""
 
     # Algorithm specific arguments
     env_id: str = "LevelTwo"
     """the id of the gym environment"""
-    total_timesteps: int = 100_000
+    total_timesteps: int = 1_000_000
     """total timesteps of the experiments"""
-    learning_rate: float = 0
+    learning_rate: float = 1e-4
     """the learning rate of the optimizer"""
     num_envs: int = 16
     """the number of parallel game environments"""
