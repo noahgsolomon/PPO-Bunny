@@ -160,7 +160,6 @@ if __name__ == "__main__":
     run_name = f"{args.env_id}__{args.exp_name}__{args.seed}__{int(time.time())}"
     if args.track:
         import wandb
-
         wandb.init(
             project=args.wandb_project_name,
             entity=args.wandb_entity,
@@ -170,6 +169,7 @@ if __name__ == "__main__":
             monitor_gym=True,
             save_code=True,
         )
+
     writer = SummaryWriter(f"runs/{run_name}")
     writer.add_text(
         "hyperparameters",
@@ -255,13 +255,6 @@ if __name__ == "__main__":
             next_done = np.logical_or(terminations, truncations)
             rewards[step] = torch.tensor(reward).to(device).view(-1)
             next_obs, next_done = torch.Tensor(next_obs).to(device), torch.Tensor(next_done).to(device)
-
-            if "final_info" in infos:
-                for info in infos["final_info"]:
-                    if info and "episode" in info:
-                        # print(f"global_step={global_step}, episodic_return={info['episode']['r']}")
-                        writer.add_scalar("charts/episodic_return", info["episode"]["r"], global_step)
-                        writer.add_scalar("charts/episodic_length", info["episode"]["l"], global_step)
 
         # bootstrap value if not done
         with torch.no_grad():
